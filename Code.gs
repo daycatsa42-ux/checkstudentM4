@@ -21,13 +21,53 @@ const API_ACTIONS = {
 };
 
 function doGet(e) {
-  if (e && e.parameter && e.parameter.action) {
-    return handleApi_(e.parameter, 'GET');
+
+  // ===== API MODE =====
+  if (e && e.parameter.action) {
+
+    const action = e.parameter.action;
+
+    // โหลดนักเรียน
+    if (action === 'getStudents') {
+
+      const room = e.parameter.room || '';
+
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          ok: true,
+          result: getStudents(room)
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // โหลดรายงาน
+    if (action === 'getReport') {
+
+      return ContentService
+        .createTextOutput(JSON.stringify(
+          getReport(
+            e.parameter.room || '',
+            e.parameter.start || '',
+            e.parameter.end || ''
+          )
+        ))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // โหลดสถานะ
+    if (action === 'getSubmissionStatus') {
+
+      return ContentService
+        .createTextOutput(JSON.stringify(
+          getSubmissionStatus(e.parameter.date || '')
+        ))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
   }
 
-  return HtmlService.createHtmlOutputFromFile('index')
-    .setTitle('ระบบเช็คชื่อ ม.4 – โรงเรียนหนองหานวิทยา')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  // ===== WEB MODE =====
+  return HtmlService
+    .createHtmlOutputFromFile('index');
 }
 
 function doPost(e) {
