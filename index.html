@@ -167,6 +167,27 @@
     </div>
 
     <div class="card">
+      <h2 style="margin-bottom:16px;font-size:24px;font-weight:800;color:#2d3748">จัดการวันหยุด</h2>
+      <div class="filter-section">
+        <div class="filter-group">
+          <label class="filter-label">วันที่หยุด</label>
+          <input type="date" class="filter-input" id="holidayDate">
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">หมายเหตุ / ชื่อวันหยุด</label>
+          <input class="filter-input" id="holidayTitle" placeholder="เช่น วันหยุดพิเศษ / กิจกรรมโรงเรียน">
+        </div>
+      </div>
+      <div class="action-buttons">
+        <button class="action-btn secondary" onclick="addHoliday()">เพิ่มวันหยุด</button>
+        <button class="action-btn" onclick="loadHolidays()">โหลดรายการวันหยุด</button>
+      </div>
+      <div style="font-size:14px;color:#718096;margin-top:8px">เมื่อเพิ่มวันหยุดแล้ว ระบบจะล็อกไม่ให้ครูเช็คชื่อหรือเช็คชื่อย้อนหลังในวันที่กำหนด</div>
+      <div id="holidayList" style="margin-top:16px"></div>
+    </div>
+
+
+    <div class="card">
       <h2 style="margin-bottom:16px;font-size:24px;font-weight:800;color:#2d3748">เพิ่มนักเรียนใหม่</h2>
       <div class="filter-section">
         <div class="filter-group">
@@ -211,8 +232,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ===== ใส่ค่าของ Supabase ตรงนี้ ===== */
-const SUPABASE_URL = 'https://yzkbmnjvwpqowypdxxnd.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_hbCRKLrc5oHkTjCijEjw7g_M50HluqG';
+const SUPABASE_URL = 'ใส่ Project URL ของ Supabase ตรงนี้';
+const SUPABASE_ANON_KEY = 'ใส่ anon public key ของ Supabase ตรงนี้';
 
 /* ===== ตั้งค่าห้องเรียน ===== */
 const rooms = ['ม.4/1','ม.4/2','ม.4/3','ม.4/4','ม.4/5','ม.4/6','ม.4/7','ม.4/8','ม.4/9','ม.4/10','ม.4/11'];
@@ -231,6 +252,10 @@ let manageUnlocked = false; // ไม่จำรหัสค้างไว้ 
 document.addEventListener('DOMContentLoaded', () => {
   initSupabase();
   initRoomGrid();
+  const attendanceDateInput = document.getElementById('attendanceDate');
+  if (attendanceDateInput) {
+    attendanceDateInput.addEventListener('change', handleAttendanceDateChange);
+  }
 });
 
 function initSupabase(){
@@ -330,6 +355,45 @@ async function checkAttendanceExists(dateISO, room){
   return data && data.length > 0;
 }
 
+async function getHoliday(dateISO){
+  ensureDb();
+  const { data, error } = await db
+    .from('holidays')
+    .select('date,title')
+    .eq('date', dateISO)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
+}
+
+async function isHoliday(dateISO){
+  const h = await getHoliday(dateISO);
+  return h;
+}
+
+async function handleAttendanceDateChange(){
+  const dateISO = document.getElementById('attendanceDate').value;
+  if (!dateISO) return;
+
+  try {
+    const holiday = await isHoliday(dateISO);
+    const saveBtn = document.getElementById('saveBtn');
+
+    if (holiday) {
+      if (saveBtn) saveBtn.disabled = true;
+      document.querySelectorAll('.status-btn').forEach(b => b.disabled = true);
+      showToast(`⛔ ${formatDateTH(dateISO)} เป็นวันหยุด: ${holiday.title || 'วันหยุด'} ไม่สามารถเช็คชื่อได้`, '#e53e3e');
+    } else {
+      if (saveBtn) saveBtn.disabled = false;
+      document.querySelectorAll('.status-btn').forEach(b => b.disabled = false);
+    }
+  } catch(err) {
+    console.error(err);
+    showToast('❌ ตรวจสอบวันหยุดไม่สำเร็จ: ' + err.message, '#e53e3e');
+  }
+}
+
 async function openAttendance(room){
   try {
     currentRoom = room;
@@ -337,6 +401,12 @@ async function openAttendance(room){
     document.getElementById('currentRoom').textContent = room;
     document.getElementById('attendanceDate').value = todayISO();
     const dateISO = document.getElementById('attendanceDate').value;
+
+    const holiday = await isHoliday(dateISO);
+    if (holiday) {
+      showToast(`⛔ ${formatDateTH(dateISO)} เป็นวันหยุด: ${holiday.title || 'วันหยุด'} ไม่สามารถเช็คชื่อได้`, '#e53e3e');
+      return;
+    }
 
     const exists = await checkAttendanceExists(dateISO, room);
     if (exists) {
@@ -409,6 +479,19 @@ async function saveAttendance(){
   }
 
   const dateISO = document.getElementById('attendanceDate').value || todayISO();
+
+  try {
+    const holiday = await isHoliday(dateISO);
+    if (holiday) {
+      showToast(`⛔ ${formatDateTH(dateISO)} เป็นวันหยุด: ${holiday.title || 'วันหยุด'} ไม่สามารถบันทึกเช็คชื่อได้`, '#e53e3e');
+      return;
+    }
+  } catch(err) {
+    console.error(err);
+    showToast('❌ ตรวจสอบวันหยุดไม่สำเร็จ: ' + err.message,'#e53e3e');
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = 'กำลังบันทึก...';
   btn.style.background = '#cbd5e0';
@@ -859,6 +942,8 @@ async function loadMissingBackdate(){
 
   try {
     const rows = await getReport(room, start, end);
+    const holidays = await getHolidaysInRange(start, end);
+    const holidaySet = new Set(holidays.map(h => h.date));
     const checked = new Set(rows.map(r => r.date));
     const missingDates = [];
     let d = new Date(start + 'T00:00:00');
@@ -866,7 +951,7 @@ async function loadMissingBackdate(){
     while (d <= endD) {
       const iso = toISODate(d);
       const day = d.getDay();
-      if (day !== 0 && day !== 6 && !checked.has(iso)) missingDates.push(iso);
+      if (day !== 0 && day !== 6 && !checked.has(iso) && !holidaySet.has(iso)) missingDates.push(iso);
       d.setDate(d.getDate() + 1);
     }
     renderMissingBackdate(room, missingDates);
@@ -893,6 +978,13 @@ async function openBackdateAttendance(room, dateISO){
     currentAttendance = {};
     document.getElementById('currentRoom').textContent = `${room} | ${formatDateTH(dateISO)}`;
     document.getElementById('attendanceDate').value = dateISO;
+
+    const holiday = await isHoliday(dateISO);
+    if (holiday) {
+      showToast(`⛔ ${formatDateTH(dateISO)} เป็นวันหยุด: ${holiday.title || 'วันหยุด'} ไม่สามารถเช็คชื่อย้อนหลังได้`, '#e53e3e');
+      return;
+    }
+
     currentStudents = await getStudents(room);
     renderStudentList(currentStudents);
     showPage('attendance');
@@ -914,6 +1006,94 @@ function initManageFilters(){
   fillRoomSelect('manageFromRoom','เลือกห้อง');
   fillRoomSelect('manageToRoom','เลือกห้องปลายทาง');
   document.getElementById('manageStudentsList').innerHTML = '';
+  const holidayDate = document.getElementById('holidayDate');
+  if (holidayDate && !holidayDate.value) holidayDate.value = todayISO();
+  loadHolidays();
+}
+
+
+async function getHolidaysInRange(startISO, endISO){
+  ensureDb();
+  let q = db
+    .from('holidays')
+    .select('id,date,title')
+    .order('date', { ascending:true });
+
+  if (startISO) q = q.gte('date', startISO);
+  if (endISO) q = q.lte('date', endISO);
+
+  const { data, error } = await q;
+  if (error) throw error;
+  return data || [];
+}
+
+async function loadHolidays(){
+  const wrap = document.getElementById('holidayList');
+  if (!wrap) return;
+
+  try {
+    const today = todayISO();
+    const holidays = await getHolidaysInRange(today, '2099-12-31');
+
+    if (!holidays.length) {
+      wrap.innerHTML = `<div class="empty-state" style="padding:24px"><div class="empty-icon">📅</div><div class="empty-text">ยังไม่มีวันหยุดที่บันทึกไว้</div></div>`;
+      return;
+    }
+
+    wrap.innerHTML = `<div class="student-list">${holidays.map(h => `
+      <div class="student-item">
+        <div class="student-info">
+          <div class="student-no">📅</div>
+          <div>
+            <div class="student-name" style="font-size:24px">${formatDateTH(h.date)}</div>
+            <div style="color:#718096;font-weight:700;margin-top:4px">${escapeHTML(h.title || 'วันหยุด')}</div>
+          </div>
+        </div>
+        <button class="action-btn danger" onclick="deleteHoliday(${Number(h.id)})">ลบ</button>
+      </div>
+    `).join('')}</div>`;
+  } catch(err) {
+    console.error(err);
+    showToast('❌ โหลดวันหยุดไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+async function addHoliday(){
+  const dateISO = document.getElementById('holidayDate').value;
+  const title = document.getElementById('holidayTitle').value.trim() || 'วันหยุด';
+
+  if (!dateISO) return showToast('⚠️ กรุณาเลือกวันที่หยุด','#dd6b20');
+
+  try {
+    ensureDb();
+    const { error } = await db
+      .from('holidays')
+      .upsert([{ date:dateISO, title:title }], { onConflict:'date' });
+
+    if (error) throw error;
+
+    document.getElementById('holidayTitle').value = '';
+    showToast(`✅ เพิ่มวันหยุด ${formatDateTH(dateISO)} แล้ว`);
+    await loadHolidays();
+  } catch(err) {
+    console.error(err);
+    showToast('❌ เพิ่มวันหยุดไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+async function deleteHoliday(id){
+  if (!confirm('ต้องการลบวันหยุดนี้ใช่ไหม?')) return;
+
+  try {
+    ensureDb();
+    const { error } = await db.from('holidays').delete().eq('id', id);
+    if (error) throw error;
+    showToast('✅ ลบวันหยุดแล้ว');
+    await loadHolidays();
+  } catch(err) {
+    console.error(err);
+    showToast('❌ ลบวันหยุดไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
 }
 
 async function getNextStudentNo(room){
