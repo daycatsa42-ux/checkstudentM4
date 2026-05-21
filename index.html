@@ -652,10 +652,11 @@
 
     <div class="room-grid" id="statusGrid"></div>
     <div id="weeklyStatusBox" class="card" style="display:none;margin-top:25px">
-  <h2 style="margin-bottom:15px;font-size:24px;font-weight:800;color:#2d3748">
-    สรุปสถานะการเช็คชื่อรายสัปดาห์
-  </h2>
-  <div id="weeklyStatusContent"></div>
+      <h2 style="margin-bottom:15px;font-size:24px;font-weight:800;color:#2d3748">
+        สรุปสถานะการเช็คชื่อรายสัปดาห์
+      </h2>
+      <div id="weeklyStatusContent"></div>
+    </div>
   </div>
 
   <div id="editPage" class="page">
@@ -693,11 +694,27 @@
   /** ========= GITHUB PAGES CONFIG =========
    * ใส่ URL จาก Google Apps Script Web app ตรงนี้
    * ตัวอย่าง: const API_ENDPOINT = 'https://script.google.com/macros/s/XXXXX/exec';
+   * หมายเหตุ: ใช้ URL ที่ลงท้าย /exec เท่านั้น
    */
-  const API_ENDPOINT = '1zauQGNbVvQ_pLOh-D23fMttkil2HKORxQthX53T9n_o';
+  const API_ENDPOINT = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
 
-  // ทำให้โค้ดเดิมที่เรียก google.script.run ใช้งานบน GitHub Pages ได้
-  // โดยไม่ต้องแก้ logic ฟังก์ชันเดิม
+  /** ========= GITHUB ↔ APPS SCRIPT BRIDGE =========
+   * แก้ปัญหา GitHub Pages ดึงข้อมูลไม่ขึ้นจาก CORS
+   * - งานอ่านข้อมูลใช้ JSONP ก่อน เช่น getStudents/getReport/getSubmissionStatus
+   * - งานบันทึกใช้ POST ก่อน แล้ว fallback เป็น JSONP หาก POST โดนบล็อก
+   * - โค้ดเดิมที่เรียก google.script.run ใช้งานต่อได้เหมือนเดิม
+   */
+  const READ_ACTIONS = new Set([
+    'getStudents',
+    'getReport',
+    'exportReportCSV',
+    'getEditRecords',
+    'getSubmissionStatus',
+    'getWeeklySubmissionStatus',
+    'checkAttendanceExists',
+    'getMissingAttendanceDates'
+  ]);
+
   window.google = window.google || {};
   google.script = google.script || {};
 
@@ -739,67 +756,114 @@
     });
   }
 
-  async function callApi(action, args, successHandler, failureHandler) {
-    if (!API_ENDPOINT || API_ENDPOINT.includes('PASTE_YOUR')) {
-      const err = new Error('ยังไม่ได้ใส่ API_ENDPOINT ในไฟล์ index.html');
-      if (failureHandler) failureHandler(err);
-      else console.error(err);
-      return;
+  function getApiEndpoint(){
+    const url = String(API_ENDPOINT || '').trim();
+
+    if (!url || url.includes('PASTE_YOUR')) {
+      throw new Error('ยังไม่ได้ใส่ API_ENDPOINT ในไฟล์ index.html');
     }
 
+    if (!url.includes('/exec')) {
+      throw new Error('API_ENDPOINT ต้องเป็น Web app URL ที่ลงท้ายด้วย /exec');
+    }
+
+    return url;
+  }
+
+  async function callApi(action, args, successHandler, failureHandler) {
     try {
-      const res = await fetch(API_ENDPOINT, {
-        method: 'POST',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action, args })
-      });
+      let result;
 
-      const data = await res.json();
-
-      if (!data || data.ok === false) {
-        throw new Error(data && data.error ? data.error : 'API error');
+      if (READ_ACTIONS.has(action)) {
+        // อ่านข้อมูลด้วย JSONP ก่อน เพื่อไม่ติด CORS บน GitHub Pages
+        result = await callApiJsonp(action, args);
+      } else {
+        // งานบันทึกลอง POST ก่อน ถ้าโดน CORS บล็อกค่อย fallback JSONP
+        try {
+          result = await callApiPost(action, args);
+        } catch (postErr) {
+          console.warn('POST API failed, fallback to JSONP:', postErr);
+          result = await callApiJsonp(action, args);
+        }
       }
 
-      if (successHandler) successHandler(data.result);
+      if (successHandler) successHandler(result);
+      return result;
 
     } catch (err) {
-      // สำรองด้วย JSONP ในกรณี browser/server บล็อก CORS
-      callApiJsonp(action, args)
-        .then(result => {
-          if (successHandler) successHandler(result);
-        })
-        .catch(finalErr => {
-          if (failureHandler) failureHandler(finalErr);
-          else console.error(finalErr);
-        });
+      console.error('API ERROR:', action, err);
+      const message = err && err.message ? err.message : String(err);
+
+      if (typeof showToast === 'function') {
+        showToast('❌ โหลดข้อมูลไม่สำเร็จ: ' + message, '#e53e3e');
+      }
+
+      if (failureHandler) failureHandler(err);
     }
+  }
+
+  async function callApiPost(action, args) {
+    const endpoint = getApiEndpoint();
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action, args })
+    });
+
+    const text = await res.text();
+    const data = JSON.parse(text);
+
+    if (!data || data.ok === false) {
+      throw new Error(data && data.error ? data.error : 'API error');
+    }
+
+    return data.result;
   }
 
   function callApiJsonp(action, args) {
     return new Promise((resolve, reject) => {
+      let endpoint;
+
+      try {
+        endpoint = getApiEndpoint();
+      } catch (err) {
+        reject(err);
+        return;
+      }
+
       const cb = '__gas_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
       const script = document.createElement('script');
-      const sep = API_ENDPOINT.includes('?') ? '&' : '?';
+      const sep = endpoint.includes('?') ? '&' : '?';
+      const timer = setTimeout(() => {
+        cleanup();
+        reject(new Error('API ไม่ตอบกลับ กรุณาตรวจสอบ Deploy Apps Script และสิทธิ์ Anyone'));
+      }, 20000);
 
       window[cb] = function(data) {
         cleanup();
-        if (!data || data.ok === false) reject(new Error(data && data.error ? data.error : 'API error'));
-        else resolve(data.result);
+
+        if (!data || data.ok === false) {
+          reject(new Error(data && data.error ? data.error : 'API error'));
+        } else {
+          resolve(data.result);
+        }
       };
 
       function cleanup() {
-        delete window[cb];
+        clearTimeout(timer);
+        try { delete window[cb]; } catch(e) { window[cb] = undefined; }
         if (script.parentNode) script.parentNode.removeChild(script);
       }
 
       script.onerror = function() {
         cleanup();
-        reject(new Error('เชื่อมต่อ API ไม่สำเร็จ'));
+        reject(new Error('เชื่อมต่อ API ไม่สำเร็จ ตรวจสอบว่าใช้ URL /exec และเปิดสิทธิ์ Anyone แล้ว'));
       };
 
-      script.src = API_ENDPOINT + sep + 'action=' + encodeURIComponent(action) +
-        '&args=' + encodeURIComponent(JSON.stringify(args)) +
-        '&callback=' + encodeURIComponent(cb);
+      script.src = endpoint + sep + 'action=' + encodeURIComponent(action) +
+        '&args=' + encodeURIComponent(JSON.stringify(args || [])) +
+        '&callback=' + encodeURIComponent(cb) +
+        '&_=' + Date.now();
 
       document.body.appendChild(script);
     });
