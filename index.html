@@ -986,33 +986,46 @@ async function loadManageStudents(){
   }
 }
 
-async function moveStudent(fromRoom, no, name){
-  const toRoom = document.getElementById('manageToRoom').value;
-
-  if (!toRoom) return showToast('⚠️ กรุณาเลือกห้องปลายทาง','#dd6b20');
-  if (toRoom === fromRoom) return showToast('⚠️ ห้องปลายทางต้องไม่ใช่ห้องเดิม','#dd6b20');
-
-  const ok = confirm(`ย้าย ${name} จาก ${fromRoom} ไป ${toRoom} ใช่ไหม?\nระบบจะให้เลขที่ใหม่ต่อท้ายห้องปลายทาง และไม่แก้ประวัติการเช็คชื่อเก่า`);
-  if (!ok) return;
-
-  try {
-    ensureDb();
-    const newNo = await getNextStudentNo(toRoom);
-    const { error } = await db
-      .from('students')
-      .update({ room:toRoom, no:newNo })
-      .eq('room', fromRoom)
-      .eq('no', no)
-      .eq('name', name);
-
-    if (error) throw error;
-
-    showToast(`✅ ย้ายห้องสำเร็จ: ${toRoom} เลขที่ ${newNo}`);
-    loadManageStudents();
-  } catch(err) {
-    console.error(err);
-    showToast('❌ ย้ายห้องไม่สำเร็จ: ' + err.message,'#e53e3e');
+async function moveStudent(studentId, oldRoom, no, name, newRoom){
+  if (!newRoom) {
+    showToast('⚠️ กรุณาเลือกห้องใหม่','#dd6b20');
+    return;
   }
+
+  const cleanName = String(name || '').trim();
+
+  const { error: studentError } = await supabaseClient
+    .from('students')
+    .update({ room: newRoom })
+    .eq('id', studentId);
+
+  if (studentError) {
+    console.error(studentError);
+    showToast('❌ ย้ายห้องนักเรียนไม่สำเร็จ','#e53e3e');
+    return;
+  }
+
+  const { error: attendanceError } = await supabaseClient
+    .from('attendance')
+    .update({ room: newRoom })
+    .eq('student_no', no)
+    .eq('student_name', cleanName)
+    .eq('room', oldRoom);
+
+  if (attendanceError) {
+    console.error(attendanceError);
+    showToast('⚠️ ย้ายห้องแล้ว แต่ประวัติเช็คชื่อเดิมยังไม่ถูกย้าย','#dd6b20');
+  } else {
+    showToast('✅ ย้ายห้องและย้ายข้อมูลเดิมเรียบร้อยแล้ว');
+  }
+
+  await loadManageStudents();
+  await supabaseClient
+  .from('attendance')
+  .update({ room: newRoom })
+  .eq('student_no', no)
+  .eq('student_name', name)
+  .eq('room', oldRoom);
 }
 
 function escapeHTML(s){
