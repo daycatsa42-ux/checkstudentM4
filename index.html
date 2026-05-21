@@ -1,522 +1,65 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบเช็คชื่อ ม.4 - โรงเรียนหนองหานวิทยา</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
   <style>
-    body{box-sizing:border-box}
     *{margin:0;padding:0;box-sizing:border-box}
-
-    html,body{
-      height:100%;
-      font-family:'Sarabun',sans-serif;
-      background:linear-gradient(135deg,#e0c3fc 0%, #8ec5fc 100%);
-      color:#2d3748;
-    }
-
-    .container{
-      min-height:100%;
-      padding:20px;
-      max-width:1200px;
-      margin:0 auto;
-    }
-
-    .navbar{
-      background:#fff;
-      border-radius:16px;
-      padding:20px 30px;
-      margin-bottom:30px;
-      box-shadow:0 4px 20px rgba(0,0,0,.08);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:15px;
-    }
-
-    .navbar-brand{
-      font-size:20px;
-      font-weight:700;
-      color:#667eea;
-    }
-
-    .navbar-menu{
-      display:flex;
-      gap:15px;
-      flex-wrap:wrap;
-    }
-
-    .nav-btn{
-      padding:10px 20px;
-      border:none;
-      border-radius:10px;
-      background:#f7fafc;
-      color:#4a5568;
-      font-size:16px;
-      font-weight:500;
-      cursor:pointer;
-      transition:.3s;
-      font-family:'Sarabun',sans-serif;
-    }
-
-    .nav-btn:hover{
-      background:#667eea;
-      color:#fff;
-      transform:translateY(-2px);
-    }
-
-    .nav-btn.active{
-      background:#667eea;
-      color:#fff;
-    }
-
-    .page{
-      display:none;
-    }
-
-    .page.active{
-      display:block;
-    }
-
-    .page-title{
-      text-align:center;
-      font-size:32px;
-      font-weight:700;
-      color:#2d3748;
-      margin-bottom:30px;
-      text-shadow:0 2px 4px rgba(0,0,0,.1);
-    }
-
-    .room-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:20px;
-      margin-top:30px;
-    }
-
-    .room-card{
-      background:#fff;
-      border-radius:16px;
-      padding:30px;
-      text-align:center;
-      cursor:pointer;
-      transition:.3s;
-      box-shadow:0 4px 15px rgba(0,0,0,.08);
-      border:3px solid transparent;
-    }
-
-    .room-card:hover{
-      transform:translateY(-5px);
-      box-shadow:0 8px 25px rgba(102,126,234,.3);
-      border-color:#667eea;
-    }
-
-    .room-icon{
-      font-size:48px;
-      margin-bottom:15px;
-    }
-
-    .room-name{
-      font-size:24px;
-      font-weight:600;
-      color:#667eea;
-    }
-
-    .card{
-      background:#fff;
-      border-radius:16px;
-      padding:30px;
-      box-shadow:0 4px 20px rgba(0,0,0,.08);
-      margin-bottom:20px;
-    }
-
-    .card-header{
-      display:flex;
-      gap:15px;
-      align-items:flex-end;
-      flex-wrap:wrap;
-      justify-content:space-between;
-    }
-
-    .room-title{
-      font-size:28px;
-      font-weight:700;
-      color:#667eea;
-    }
-
-    .student-list{
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-    }
-
-    .student-item{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:24px;
-      background:#f7fafc;
-      border-radius:14px;
-      transition:.3s;
-      flex-wrap:wrap;
-      gap:18px;
-    }
-
-    .student-item:hover{
-      background:#edf2f7;
-      transform:translateX(5px);
-    }
-
-    .student-info{
-      display:flex;
-      align-items:center;
-      gap:18px;
-      flex:1;
-      min-width:240px;
-    }
-
-    .student-no{
-      font-size:28px;
-      font-weight:800;
-      color:#667eea;
-      min-width:50px;
-    }
-
-    .student-name{
-      font-size:30px;
-      font-weight:800;
-      color:#2d3748;
-    }
-
-    .status-buttons{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .status-btn{
-      padding:14px 24px;
-      border:2px solid transparent;
-      border-radius:12px;
-      font-size:20px;
-      font-weight:800;
-      cursor:pointer;
-      transition:.3s;
-      font-family:'Sarabun',sans-serif;
-      min-width:104px;
-    }
-
-    .status-btn.present{
-      background:#f0fff4;
-      color:#38a169;
-      border-color:#38a169;
-    }
-
-    .status-btn.present.active{
-      background:#38a169;
-      color:#fff;
-    }
-
-    .status-btn.absent{
-      background:#fff5f5;
-      color:#e53e3e;
-      border-color:#e53e3e;
-    }
-
-    .status-btn.absent.active{
-      background:#e53e3e;
-      color:#fff;
-    }
-
-    .status-btn.leave{
-      background:#fffaf0;
-      color:#dd6b20;
-      border-color:#dd6b20;
-    }
-
-    .status-btn.leave.active{
-      background:#dd6b20;
-      color:#fff;
-    }
-
-    .status-btn:hover{
-      transform:scale(1.05);
-    }
-
-    .save-btn{
-      width:100%;
-      padding:22px;
-      background:#667eea;
-      color:#fff;
-      border:none;
-      border-radius:12px;
-      font-size:24px;
-      font-weight:900;
-      cursor:pointer;
-      margin-top:22px;
-      transition:.3s;
-      font-family:'Sarabun',sans-serif;
-    }
-
-    .save-btn:hover{
-      background:#5a67d8;
-      transform:translateY(-2px);
-      box-shadow:0 8px 20px rgba(102,126,234,.4);
-    }
-
-    .save-btn:disabled{
-      background:#cbd5e0;
-      cursor:not-allowed;
-      transform:none;
-    }
-
-    .filter-section{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-      gap:20px;
-      margin-bottom:25px;
-    }
-
-    .filter-group{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .filter-label{
-      font-size:16px;
-      font-weight:600;
-      color:#4a5568;
-    }
-
-    .filter-input,.filter-select{
-      padding:12px 16px;
-      border:2px solid #e2e8f0;
-      border-radius:10px;
-      font-size:16px;
-      font-family:'Sarabun',sans-serif;
-      transition:.3s;
-    }
-
-    .filter-input:focus,.filter-select:focus{
-      outline:none;
-      border-color:#667eea;
-      box-shadow:0 0 0 3px rgba(102,126,234,.1);
-    }
-
-    .action-btn{
-      padding:12px 20px;
-      background:#667eea;
-      color:#fff;
-      border:none;
-      border-radius:10px;
-      font-size:16px;
-      font-weight:600;
-      cursor:pointer;
-      transition:.3s;
-      font-family:'Sarabun',sans-serif;
-    }
-
-    .action-btn:hover{
-      background:#5a67d8;
-      transform:translateY(-2px);
-    }
-
-    .action-btn.secondary{
-      background:#48bb78;
-    }
-
-    .action-btn.secondary:hover{
-      background:#38a169;
-    }
-
-    .action-btn.danger{
-      background:#e53e3e;
-    }
-
-    .action-btn.danger:hover{
-      background:#c53030;
-    }
-
-    .action-buttons{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin:10px 0 5px 0;
-    }
-
-    .kpi-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:20px;
-      margin-bottom:30px;
-    }
-
-    .kpi-card{
-      background:linear-gradient(135deg,#667eea 0%, #764ba2 100%);
-      color:#fff;
-      padding:25px;
-      border-radius:16px;
-      text-align:center;
-      box-shadow:0 4px 15px rgba(102,126,234,.3);
-    }
-
-    .kpi-value{
-      font-size:36px;
-      font-weight:700;
-      margin-bottom:10px;
-    }
-
-    .kpi-label{
-      font-size:16px;
-      opacity:.9;
-    }
-
-    .report-table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:20px;
-    }
-
-    .report-table th,.report-table td{
-      padding:15px;
-      text-align:left;
-      border-bottom:1px solid #e2e8f0;
-    }
-
-    .report-table th{
-      background:#f7fafc;
-      font-weight:600;
-      color:#4a5568;
-    }
-
-    .report-table tr:hover{
-      background:#f7fafc;
-    }
-
-    .toast{
-      position:fixed;
-      bottom:30px;
-      right:30px;
-      background:#38a169;
-      color:#fff;
-      padding:20px 30px;
-      border-radius:12px;
-      box-shadow:0 8px 25px rgba(0,0,0,.2);
-      font-size:18px;
-      font-weight:600;
-      opacity:0;
-      transform:translateY(20px);
-      transition:.3s;
-      z-index:1000;
-    }
-
-    .toast.show{
-      opacity:1;
-      transform:translateY(0);
-    }
-
-    .empty-state{
-      text-align:center;
-      padding:60px 20px;
-      color:#718096;
-    }
-
-    .empty-icon{
-      font-size:64px;
-      margin-bottom:20px;
-    }
-
-    .empty-text{
-      font-size:20px;
-      font-weight:500;
-    }
-
-    .edit-item{
-      background:#f7fafc;
-      padding:20px;
-      border-radius:12px;
-      margin-bottom:15px;
-      border-left:4px solid #667eea;
-    }
-
-    .edit-item-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:15px;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-
-    .edit-item-info{
-      font-size:16px;
-      font-weight:600;
-      color:#2d3748;
-    }
-
-    .status-card{
-      border-radius:16px;
-      padding:22px;
-      text-align:center;
-      color:#fff;
-      font-weight:800;
-      box-shadow:0 6px 18px rgba(0,0,0,.1);
-    }
-
-    .status-ok{
-      background:linear-gradient(135deg,#22c55e,#16a34a);
-    }
-
-    .status-miss{
-      background:linear-gradient(135deg,#f43f5e,#e11d48);
-    }
-
-    .status-room{
-      font-size:20px;
-      margin-top:6px;
-    }
-
-    .status-count{
-      font-size:14px;
-      opacity:.95;
-    }
-
-    .credit{
-      text-align:center;
-      color:#4a5568;
-      font-size:14px;
-      font-weight:600;
-      margin:-8px 0 12px 0;
-      opacity:.85;
-    }
-
-    @media (max-width:768px){
-      .page-title{font-size:26px}
-      .student-item{padding:24px}
-      .student-no{font-size:30px}
-      .student-name{font-size:34px}
-      .status-btn{font-size:20px;padding:14px 24px;min-width:104px}
-      .save-btn{font-size:24px;padding:22px}
-      .room-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}
-      .room-card{padding:22px}
-      .room-icon{font-size:36px}
-      .room-name{font-size:20px}
-    }
+    html,body{min-height:100%;font-family:'Sarabun',sans-serif;background:linear-gradient(135deg,#e0c3fc 0%,#8ec5fc 100%);color:#2d3748}
+    .container{min-height:100%;padding:20px;max-width:1200px;margin:0 auto}
+    .navbar{background:#fff;border-radius:16px;padding:20px 30px;margin-bottom:30px;box-shadow:0 4px 20px rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+    .navbar-brand{font-size:20px;font-weight:700;color:#667eea}
+    .navbar-menu{display:flex;gap:15px;flex-wrap:wrap}
+    .nav-btn{padding:10px 20px;border:none;border-radius:10px;background:#f7fafc;color:#4a5568;font-size:16px;font-weight:500;cursor:pointer;transition:.3s;font-family:'Sarabun',sans-serif}
+    .nav-btn:hover,.nav-btn.active{background:#667eea;color:#fff;transform:translateY(-2px)}
+    .page{display:none}.page.active{display:block}
+    .page-title{text-align:center;font-size:32px;font-weight:700;color:#2d3748;margin-bottom:30px;text-shadow:0 2px 4px rgba(0,0,0,.1)}
+    .room-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-top:30px}
+    .room-card{background:#fff;border-radius:16px;padding:30px;text-align:center;cursor:pointer;transition:.3s;box-shadow:0 4px 15px rgba(0,0,0,.08);border:3px solid transparent}
+    .room-card:hover{transform:translateY(-5px);box-shadow:0 8px 25px rgba(102,126,234,.3);border-color:#667eea}
+    .room-icon{font-size:48px;margin-bottom:15px}.room-name{font-size:24px;font-weight:600;color:#667eea}
+    .card{background:#fff;border-radius:16px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:20px}
+    .card-header{display:flex;gap:15px;align-items:flex-end;flex-wrap:wrap;justify-content:space-between}
+    .room-title{font-size:28px;font-weight:700;color:#667eea}
+    .student-list{display:flex;flex-direction:column;gap:18px}
+    .student-item{display:flex;justify-content:space-between;align-items:center;padding:24px;background:#f7fafc;border-radius:14px;transition:.3s;flex-wrap:wrap;gap:18px}
+    .student-item:hover{background:#edf2f7;transform:translateX(5px)}
+    .student-info{display:flex;align-items:center;gap:18px;flex:1;min-width:240px}
+    .student-no{font-size:28px;font-weight:800;color:#667eea;min-width:50px}.student-name{font-size:30px;font-weight:800;color:#2d3748}
+    .status-buttons{display:flex;gap:10px;flex-wrap:wrap}
+    .status-btn{padding:14px 24px;border:2px solid transparent;border-radius:12px;font-size:20px;font-weight:800;cursor:pointer;transition:.3s;font-family:'Sarabun',sans-serif;min-width:104px}
+    .status-btn.present{background:#f0fff4;color:#38a169;border-color:#38a169}.status-btn.present.active{background:#38a169;color:#fff}
+    .status-btn.absent{background:#fff5f5;color:#e53e3e;border-color:#e53e3e}.status-btn.absent.active{background:#e53e3e;color:#fff}
+    .status-btn.leave{background:#fffaf0;color:#dd6b20;border-color:#dd6b20}.status-btn.leave.active{background:#dd6b20;color:#fff}
+    .status-btn:hover{transform:scale(1.05)}
+    .save-btn{width:100%;padding:22px;background:#667eea;color:#fff;border:none;border-radius:12px;font-size:24px;font-weight:900;cursor:pointer;margin-top:22px;transition:.3s;font-family:'Sarabun',sans-serif}
+    .save-btn:hover,.action-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(102,126,234,.25)}
+    .save-btn:disabled{background:#cbd5e0;cursor:not-allowed;transform:none}
+    .filter-section{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:25px}
+    .filter-group{display:flex;flex-direction:column;gap:10px}.filter-label{font-size:16px;font-weight:600;color:#4a5568}
+    .filter-input,.filter-select{padding:12px 16px;border:2px solid #e2e8f0;border-radius:10px;font-size:16px;font-family:'Sarabun',sans-serif;transition:.3s}
+    .filter-input:focus,.filter-select:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1)}
+    .action-btn{padding:12px 20px;background:#667eea;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;transition:.3s;font-family:'Sarabun',sans-serif}
+    .action-btn.secondary{background:#48bb78}.action-btn.danger{background:#e53e3e}.action-buttons{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 5px}
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:30px}
+    .kpi-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:25px;border-radius:16px;text-align:center;box-shadow:0 4px 15px rgba(102,126,234,.3)}
+    .kpi-value{font-size:36px;font-weight:700;margin-bottom:10px}.kpi-label{font-size:16px;opacity:.9}
+    .report-table{width:100%;border-collapse:collapse;margin-top:20px}.report-table th,.report-table td{padding:15px;text-align:left;border-bottom:1px solid #e2e8f0}.report-table th{background:#f7fafc;font-weight:600;color:#4a5568}.report-table tr:hover{background:#f7fafc}
+    .toast{position:fixed;bottom:30px;right:30px;background:#38a169;color:#fff;padding:20px 30px;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,.2);font-size:18px;font-weight:600;opacity:0;transform:translateY(20px);transition:.3s;z-index:1000;max-width:90vw}.toast.show{opacity:1;transform:translateY(0)}
+    .empty-state{text-align:center;padding:60px 20px;color:#718096}.empty-icon{font-size:64px;margin-bottom:20px}.empty-text{font-size:20px;font-weight:500}
+    .edit-item{background:#f7fafc;padding:20px;border-radius:12px;margin-bottom:15px;border-left:4px solid #667eea}.edit-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px}.edit-item-info{font-size:16px;font-weight:600;color:#2d3748}
+    .status-card{border-radius:16px;padding:22px;text-align:center;color:#fff;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.1)}.status-ok{background:linear-gradient(135deg,#22c55e,#16a34a)}.status-miss{background:linear-gradient(135deg,#f43f5e,#e11d48)}.status-room{font-size:20px;margin-top:6px}.status-count{font-size:14px;opacity:.95}
+    .credit{text-align:center;color:#4a5568;font-size:14px;font-weight:600;margin:0 0 12px;opacity:.85}
+    @media(max-width:768px){.container{padding:12px}.page-title{font-size:26px}.student-no{font-size:30px}.student-name{font-size:30px}.status-btn{font-size:20px;padding:14px 20px;min-width:96px}.save-btn{font-size:24px;padding:22px}.room-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}.room-card{padding:22px}.room-icon{font-size:36px}.room-name{font-size:20px}}
   </style>
 </head>
-
 <body>
 <div class="container">
   <nav class="navbar">
-    <div class="navbar-brand" id="navbarBrand">ระบบเช็คชื่อ มัธยมศึกษาปีที่ 4 – โรงเรียนหนองหานวิทยา</div>
-
+    <div class="navbar-brand">ระบบเช็คชื่อ มัธยมศึกษาปีที่ 4 – โรงเรียนหนองหานวิทยา</div>
     <div class="navbar-menu">
       <button class="nav-btn active" onclick="showPage('home')">เช็คชื่อ</button>
       <button class="nav-btn" onclick="showPage('backdate')">เช็คชื่อย้อนหลัง</button>
@@ -527,58 +70,35 @@
   </nav>
 
   <div id="homePage" class="page active">
-    <h1 class="page-title" id="homeTitle">เช็คชื่อ ม.4 – โรงเรียนหนองหานวิทยา</h1>
+    <h1 class="page-title">เช็คชื่อ ม.4 – โรงเรียนหนองหานวิทยา</h1>
     <div class="room-grid" id="roomGrid"></div>
   </div>
+
   <div id="backdatePage" class="page">
-  <h1 class="page-title">เช็คชื่อย้อนหลัง</h1>
-
-  <div class="card">
-    <div class="filter-section">
-      <div class="filter-group">
-        <label class="filter-label">เลือกห้อง</label>
-        <select class="filter-select" id="backdateRoom">
-          <option value="">เลือกห้อง</option>
-        </select>
+    <h1 class="page-title">เช็คชื่อย้อนหลัง</h1>
+    <div class="card">
+      <div class="filter-section">
+        <div class="filter-group"><label class="filter-label">เลือกห้อง</label><select class="filter-select" id="backdateRoom"><option value="">เลือกห้อง</option></select></div>
+        <div class="filter-group"><label class="filter-label">วันที่เริ่มต้น</label><input type="date" class="filter-input" id="backdateStart"></div>
+        <div class="filter-group"><label class="filter-label">วันที่สิ้นสุด</label><input type="date" class="filter-input" id="backdateEnd"></div>
       </div>
-
-      <div class="filter-group">
-        <label class="filter-label">วันที่เริ่มต้น</label>
-        <input type="date" class="filter-input" id="backdateStart">
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">วันที่สิ้นสุด</label>
-        <input type="date" class="filter-input" id="backdateEnd">
-      </div>
+      <div class="action-buttons"><button class="action-btn" onclick="loadMissingBackdate()">แสดงวันที่ยังไม่เช็ค</button></div>
     </div>
-
-    <div class="action-buttons">
-      <button class="action-btn" onclick="loadMissingBackdate()">แสดงวันที่ยังไม่เช็ค</button>
-    </div>
+    <div id="backdateResults"></div>
   </div>
-
-  <div id="backdateResults"></div>
-</div>
 
   <div id="attendancePage" class="page">
     <div class="card">
       <div class="card-header">
         <div class="room-title" id="currentRoom"></div>
-
-        <div class="filter-group" style="min-width:220px">
-          <label class="filter-label">วันที่เช็คชื่อ</label>
-          <input type="date" class="filter-input" id="attendanceDate">
-        </div>
+        <div class="filter-group" style="min-width:220px"><label class="filter-label">วันที่เช็คชื่อ</label><input type="date" class="filter-input" id="attendanceDate"></div>
       </div>
-
       <div class="action-buttons">
         <button class="action-btn secondary" onclick="markAll('M')">มาทั้งหมด</button>
         <button class="action-btn danger" onclick="markAll('K')">ขาดทั้งหมด</button>
         <button class="action-btn" style="background:#dd6b20" onclick="markAll('L')">ลาทั้งหมด</button>
         <button class="action-btn" style="background:#718096" onclick="clearAll()">ล้างข้อมูล</button>
       </div>
-
       <div class="student-list" id="studentList"></div>
       <button class="save-btn" id="saveBtn" onclick="saveAttendance()">บันทึกข้อมูล</button>
     </div>
@@ -586,62 +106,29 @@
 
   <div id="reportPage" class="page">
     <h1 class="page-title">รายงานการเข้าร่วมกิจกรรมหน้าเสาธง</h1>
-
     <div class="card">
       <div class="filter-section">
-        <div class="filter-group">
-          <label class="filter-label">เลือกห้อง</label>
-          <select class="filter-select" id="reportRoom">
-            <option value="">ทุกห้อง</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label class="filter-label">วันที่เริ่มต้น</label>
-          <input type="date" class="filter-input" id="reportStartDate">
-        </div>
-
-        <div class="filter-group">
-          <label class="filter-label">วันที่สิ้นสุด</label>
-          <input type="date" class="filter-input" id="reportEndDate">
-        </div>
+        <div class="filter-group"><label class="filter-label">เลือกห้อง</label><select class="filter-select" id="reportRoom"><option value="">ทุกห้อง</option></select></div>
+        <div class="filter-group"><label class="filter-label">วันที่เริ่มต้น</label><input type="date" class="filter-input" id="reportStartDate"></div>
+        <div class="filter-group"><label class="filter-label">วันที่สิ้นสุด</label><input type="date" class="filter-input" id="reportEndDate"></div>
       </div>
-
       <div class="action-buttons">
         <button class="action-btn" onclick="generateReport()">แสดงข้อมูล</button>
         <button class="action-btn secondary" onclick="exportReport()">ส่งออก CSV</button>
         <button class="action-btn" style="background:#805ad5" onclick="exportReportPDF()">ส่งออก PDF</button>
       </div>
     </div>
-
     <div id="reportResults" style="display:none">
       <div class="kpi-grid" id="kpiGrid"></div>
-
-      <div class="card">
-        <h2 style="margin-bottom:20px;font-size:24px;font-weight:700;color:#2d3748">สรุปรายบุคคล</h2>
-        <table class="report-table" id="reportTable"></table>
-      </div>
-
-      <div class="card">
-        <h2 style="margin-bottom:20px;font-size:24px;font-weight:700;color:#2d3748">ข้อมูลการเช็คชื่อรายวัน</h2>
-        <div style="overflow-x:auto">
-          <table class="report-table" id="dailyReportTable"></table>
-        </div>
-      </div>
+      <div class="card"><h2 style="margin-bottom:20px;font-size:24px;font-weight:700;color:#2d3748">สรุปรายบุคคล</h2><div style="overflow-x:auto"><table class="report-table" id="reportTable"></table></div></div>
+      <div class="card"><h2 style="margin-bottom:20px;font-size:24px;font-weight:700;color:#2d3748">ข้อมูลการเช็คชื่อรายวัน</h2><div style="overflow-x:auto"><table class="report-table" id="dailyReportTable"></table></div></div>
     </div>
   </div>
 
   <div id="statusPage" class="page">
     <h1 class="page-title">ติดตามสถานะการส่งเช็คชื่อ</h1>
-
     <div class="card">
-      <div class="filter-section">
-        <div class="filter-group">
-          <label class="filter-label">วันที่</label>
-          <input type="date" class="filter-input" id="statusDate">
-        </div>
-      </div>
-
+      <div class="filter-section"><div class="filter-group"><label class="filter-label">วันที่</label><input type="date" class="filter-input" id="statusDate"></div></div>
       <div class="action-buttons">
         <button class="action-btn secondary" onclick="loadStatusToday()">วันนี้</button>
         <button class="action-btn" onclick="loadStatusCustom()">แสดงสถานะ</button>
@@ -649,40 +136,25 @@
         <button class="action-btn secondary" onclick="exportWeeklyStatusImage()">ส่งออกเป็นรูปภาพ</button>
       </div>
     </div>
-
     <div class="room-grid" id="statusGrid"></div>
     <div id="weeklyStatusBox" class="card" style="display:none;margin-top:25px">
-      <h2 style="margin-bottom:15px;font-size:24px;font-weight:800;color:#2d3748">
-        สรุปสถานะการเช็คชื่อรายสัปดาห์
-      </h2>
+      <h2 style="margin-bottom:15px;font-size:24px;font-weight:800;color:#2d3748">สรุปสถานะการเช็คชื่อรายสัปดาห์</h2>
       <div id="weeklyStatusContent"></div>
     </div>
   </div>
 
   <div id="editPage" class="page">
     <h1 class="page-title">แก้ไขข้อมูลการเช็คชื่อ</h1>
-
     <div class="card">
       <div class="filter-section">
-        <div class="filter-group">
-          <label class="filter-label">เลือกห้อง</label>
-          <select class="filter-select" id="editRoom">
-            <option value="">เลือกห้อง</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label class="filter-label">วันที่</label>
-          <input type="date" class="filter-input" id="editDate">
-        </div>
+        <div class="filter-group"><label class="filter-label">เลือกห้อง</label><select class="filter-select" id="editRoom"><option value="">เลือกห้อง</option></select></div>
+        <div class="filter-group"><label class="filter-label">วันที่</label><input type="date" class="filter-input" id="editDate"></div>
       </div>
-
       <div class="action-buttons">
         <button class="action-btn" onclick="loadEditDay()">โหลดรายการ</button>
         <button class="action-btn secondary" id="editSaveBtn" style="display:none" onclick="saveEditedDay()">บันทึกการแก้ไข</button>
       </div>
     </div>
-
     <div id="editResults"></div>
   </div>
 </div>
@@ -690,996 +162,450 @@
 <div class="credit">พัฒนาระบบโดยครูดิว</div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  /** ========= GITHUB PAGES CONFIG =========
-   * ใส่ URL จาก Google Apps Script Web app ตรงนี้
-  
-   * หมายเหตุ: ใช้ URL ที่ลงท้าย /exec เท่านั้น
-   */
- const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxmKVAjAfXrbrTws4t1TmE_2aPeyGXYSTSm6kclAhzv5IOF-wDFrKzN4hzeRytrBk8b/exec';
-  /** ========= GITHUB ↔ APPS SCRIPT BRIDGE =========
-   * แก้ปัญหา GitHub Pages ดึงข้อมูลไม่ขึ้นจาก CORS
-   * - งานอ่านข้อมูลใช้ JSONP ก่อน เช่น getStudents/getReport/getSubmissionStatus
-   * - งานบันทึกใช้ POST ก่อน แล้ว fallback เป็น JSONP หาก POST โดนบล็อก
-   * - โค้ดเดิมที่เรียก google.script.run ใช้งานต่อได้เหมือนเดิม
-   */
-  const READ_ACTIONS = new Set([
-    'getStudents',
-    'getReport',
-    'exportReportCSV',
-    'getEditRecords',
-    'getSubmissionStatus',
-    'getWeeklySubmissionStatus',
-    'checkAttendanceExists',
-    'getMissingAttendanceDates'
-  ]);
+/* ===== ใส่ค่าของ Supabase ตรงนี้ ===== */
+const SUPABASE_URL = 'ใส่ Project URL ของ Supabase ตรงนี้';
+const SUPABASE_ANON_KEY = 'ใส่ anon public key ของ Supabase ตรงนี้';
 
-  window.google = window.google || {};
-  google.script = google.script || {};
+/* ===== ตั้งค่าห้องเรียน ===== */
+const rooms = ['ม.4/1','ม.4/2','ม.4/3','ม.4/4','ม.4/5','ม.4/6','ม.4/7','ม.4/8','ม.4/9','ม.4/10','ม.4/11'];
+const defaultConfig = {present_text:'มา',absent_text:'ขาด',leave_text:'ลา',save_button_text:'บันทึกข้อมูล'};
 
-  google.script.run = new Proxy({}, {
-    get(target, prop) {
-      if (prop === 'withSuccessHandler') {
-        return function(handler) {
-          return createRunner(handler, null);
-        };
-      }
-      if (prop === 'withFailureHandler') {
-        return function(handler) {
-          return createRunner(null, handler);
-        };
-      }
-      return function(...args) {
-        return callApi(String(prop), args, null, null);
-      };
-    }
-  });
+let db;
+let currentRoom = '';
+let currentAttendance = {};
+let currentStudents = [];
+let lastReportData = [];
+let editState = {room:'', dateISO:'', rows:[]};
 
-  function createRunner(successHandler, failureHandler) {
-    return new Proxy({}, {
-      get(target, prop) {
-        if (prop === 'withSuccessHandler') {
-          return function(handler) {
-            return createRunner(handler, failureHandler);
-          };
-        }
-        if (prop === 'withFailureHandler') {
-          return function(handler) {
-            return createRunner(successHandler, handler);
-          };
-        }
-        return function(...args) {
-          return callApi(String(prop), args, successHandler, failureHandler);
-        };
-      }
-    });
+document.addEventListener('DOMContentLoaded', () => {
+  initSupabase();
+  initRoomGrid();
+});
+
+function initSupabase(){
+  if (!SUPABASE_URL.startsWith('https://') || SUPABASE_ANON_KEY.startsWith('ใส่')) {
+    showToast('⚠️ กรุณาใส่ SUPABASE_URL และ SUPABASE_ANON_KEY ก่อนใช้งาน','#dd6b20');
+    console.warn('กรุณาใส่ Supabase URL และ anon key');
+    return;
   }
-
-  function getApiEndpoint(){
-    const url = String(API_ENDPOINT || '').trim();
-
-    if (!url || url.includes('PASTE_YOUR')) {
-      throw new Error('ยังไม่ได้ใส่ API_ENDPOINT ในไฟล์ index.html');
-    }
-
-    if (!url.includes('/exec')) {
-      throw new Error('API_ENDPOINT ต้องเป็น Web app URL ที่ลงท้ายด้วย /exec');
-    }
-
-    return url;
-  }
-
-  async function callApi(action, args, successHandler, failureHandler) {
-    try {
-      let result;
-
-      if (READ_ACTIONS.has(action)) {
-        // อ่านข้อมูลด้วย JSONP ก่อน เพื่อไม่ติด CORS บน GitHub Pages
-        result = await callApiJsonp(action, args);
-      } else {
-        // งานบันทึกลอง POST ก่อน ถ้าโดน CORS บล็อกค่อย fallback JSONP
-        try {
-          result = await callApiPost(action, args);
-        } catch (postErr) {
-          console.warn('POST API failed, fallback to JSONP:', postErr);
-          result = await callApiJsonp(action, args);
-        }
-      }
-
-      if (successHandler) successHandler(result);
-      return result;
-
-    } catch (err) {
-      console.error('API ERROR:', action, err);
-      const message = err && err.message ? err.message : String(err);
-
-      if (typeof showToast === 'function') {
-        showToast('❌ โหลดข้อมูลไม่สำเร็จ: ' + message, '#e53e3e');
-      }
-
-      if (failureHandler) failureHandler(err);
-    }
-  }
-
-  async function callApiPost(action, args) {
-    const endpoint = getApiEndpoint();
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action, args })
-    });
-
-    const text = await res.text();
-    const data = JSON.parse(text);
-
-    if (!data || data.ok === false) {
-      throw new Error(data && data.error ? data.error : 'API error');
-    }
-
-    return data.result;
-  }
-
-  function callApiJsonp(action, args) {
-    return new Promise((resolve, reject) => {
-      let endpoint;
-
-      try {
-        endpoint = getApiEndpoint();
-      } catch (err) {
-        reject(err);
-        return;
-      }
-
-      const cb = '__gas_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-      const script = document.createElement('script');
-      const sep = endpoint.includes('?') ? '&' : '?';
-      const timer = setTimeout(() => {
-        cleanup();
-        reject(new Error('API ไม่ตอบกลับ กรุณาตรวจสอบ Deploy Apps Script และสิทธิ์ Anyone'));
-      }, 20000);
-
-      window[cb] = function(data) {
-        cleanup();
-
-        if (!data || data.ok === false) {
-          reject(new Error(data && data.error ? data.error : 'API error'));
-        } else {
-          resolve(data.result);
-        }
-      };
-
-      function cleanup() {
-        clearTimeout(timer);
-        try { delete window[cb]; } catch(e) { window[cb] = undefined; }
-        if (script.parentNode) script.parentNode.removeChild(script);
-      }
-
-      script.onerror = function() {
-        cleanup();
-        reject(new Error('เชื่อมต่อ API ไม่สำเร็จ ตรวจสอบว่าใช้ URL /exec และเปิดสิทธิ์ Anyone แล้ว'));
-      };
-
-      script.src = endpoint + sep + 'action=' + encodeURIComponent(action) +
-        '&args=' + encodeURIComponent(JSON.stringify(args || [])) +
-        '&callback=' + encodeURIComponent(cb) +
-        '&_=' + Date.now();
-
-      document.body.appendChild(script);
-    });
-  }
-
-  const defaultConfig = {
-    school_name:'โรงเรียนหนองหานวิทยา',
-    grade_level:'มัธยมศึกษาปีที่ 4',
-    present_text:'มา',
-    absent_text:'ขาด',
-    leave_text:'ลา',
-    save_button_text:'บันทึกข้อมูล'
-  };
-
-  const rooms = ['ม.4/1','ม.4/2','ม.4/3','ม.4/4','ม.4/5','ม.4/6','ม.4/7','ม.4/8','ม.4/9','ม.4/10','ม.4/11'];
-
-  let currentRoom = '';
-  let currentAttendance = {};
-  let currentStudents = [];
-  let lastReportData = [];
-  let editState = {room:'', dateISO:'', rows:[]};
-
-  function showPage(page){
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
-    const tabs = ['home','backdate','report','status','edit'];
-    const idx = tabs.indexOf(page);
-
-    document.getElementById(page + 'Page').classList.add('active');
-    document.querySelector('.nav-btn:nth-child(' + (idx + 1) + ')').classList.add('active');
-
-    if (page === 'report') initReportFilters();
-    if (page === 'status') initStatusFilters();
-    if (page === 'edit') initEditFilters();
-    if (page === 'backdate') initBackdateFilters();
-  }
-
-  function initRoomGrid(){
-    const grid = document.getElementById('roomGrid');
-    grid.innerHTML = '';
-
-    rooms.forEach(room => {
-      const card = document.createElement('div');
-      card.className = 'room-card';
-      card.onclick = () => openAttendance(room);
-
-      card.innerHTML = `
-        <div class="room-icon">🏫</div>
-        <div class="room-name">${room}</div>
-      `;
-
-      grid.appendChild(card);
-    });
-  }
-
-  function openAttendance(room){
-  currentRoom = room;
-  currentAttendance = {};
-
-  document.getElementById('currentRoom').textContent = room;
-  document.getElementById('attendanceDate').value = new Date().toISOString().slice(0,10);
-
-  const dateISO = document.getElementById('attendanceDate').value;
-
-  google.script.run
-    .withSuccessHandler(res => {
-      if (res && res.ok && res.exists) {
-        showToast('⚠️ วันนี้ห้องนี้เช็คแล้ว หากต้องการแก้ไขให้ไปที่เมนูแก้ไข','#dd6b20');
-        showPage('edit');
-
-        setTimeout(() => {
-          const editRoom = document.getElementById('editRoom');
-          const editDate = document.getElementById('editDate');
-
-          if (editRoom) editRoom.value = room;
-          if (editDate) editDate.value = dateISO;
-        }, 300);
-
-        return;
-      }
-
-      google.script.run
-        .withSuccessHandler(sts => {
-          currentStudents = sts || [];
-          renderStudentList(currentStudents);
-          showPage('attendance');
-        })
-        .withFailureHandler(e => {
-          console.error(e);
-          showToast('❌ โหลดรายชื่อนักเรียนไม่สำเร็จ','#e53e3e');
-        })
-        .getStudents(room);
-    })
-    .withFailureHandler(err => {
-      console.error(err);
-      showToast('❌ ตรวจสอบสถานะการเช็คชื่อไม่สำเร็จ','#e53e3e');
-    })
-    .checkAttendanceExists(dateISO, room);
+  db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
-  function renderStudentList(students){
-    const wrap = document.getElementById('studentList');
-    wrap.innerHTML = '';
-
-    students.forEach(st => {
-      const div = document.createElement('div');
-      div.className = 'student-item';
-
-      div.innerHTML = `
-        <div class="student-info">
-          <div class="student-no">${st.no}</div>
-          <div class="student-name">${st.name}</div>
-        </div>
-
-        <div class="status-buttons">
-          <button class="status-btn present" onclick="setStatus(${st.no},'M')" data-student="${st.no}" data-status="present">${defaultConfig.present_text}</button>
-          <button class="status-btn absent" onclick="setStatus(${st.no},'K')" data-student="${st.no}" data-status="absent">${defaultConfig.absent_text}</button>
-          <button class="status-btn leave" onclick="setStatus(${st.no},'L')" data-student="${st.no}" data-status="leave">${defaultConfig.leave_text}</button>
-        </div>
-      `;
-
-      wrap.appendChild(div);
-    });
+function ensureDb(){
+  if (!db) {
+    initSupabase();
+    if (!db) throw new Error('ยังไม่ได้ตั้งค่า Supabase');
   }
+}
 
-  function setStatus(no, s){
-    currentAttendance[no] = s;
+function todayISO(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
-    document.querySelectorAll(`[data-student="${no}"]`).forEach(b => b.classList.remove('active'));
+function normalizeStatus(s){
+  const x = String(s || '').trim().toUpperCase();
+  if (x === 'มา' || x === 'P' || x === 'M') return 'M';
+  if (x === 'ขาด' || x === 'A' || x === 'K') return 'K';
+  if (x === 'ลา' || x === 'L') return 'L';
+  return x || 'M';
+}
 
-    const map = {
-      M:'present',
-      K:'absent',
-      L:'leave'
-    };
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const tabs = ['home','backdate','report','status','edit'];
+  const idx = tabs.indexOf(page);
+  document.getElementById(page + 'Page').classList.add('active');
+  if (idx >= 0) document.querySelector('.nav-btn:nth-child(' + (idx + 1) + ')').classList.add('active');
+  if (page === 'report') initReportFilters();
+  if (page === 'status') initStatusFilters();
+  if (page === 'edit') initEditFilters();
+  if (page === 'backdate') initBackdateFilters();
+}
 
-    const active = document.querySelector(`[data-student="${no}"][data-status="${map[s]}"]`);
+function initRoomGrid(){
+  const grid = document.getElementById('roomGrid');
+  grid.innerHTML = '';
+  rooms.forEach(room => {
+    const card = document.createElement('div');
+    card.className = 'room-card';
+    card.onclick = () => openAttendance(room);
+    card.innerHTML = `<div class="room-icon">🏫</div><div class="room-name">${room}</div>`;
+    grid.appendChild(card);
+  });
+}
 
-    if (active) active.classList.add('active');
-  }
+async function getStudents(room){
+  ensureDb();
+  const { data, error } = await db.from('students').select('room,no,name').eq('room', room).order('no', {ascending:true});
+  if (error) throw error;
+  return data || [];
+}
 
-  function markAll(s){
-    if (!currentStudents.length) return;
+async function checkAttendanceExists(dateISO, room){
+  ensureDb();
+  const { data, error } = await db.from('attendance').select('id').eq('date', dateISO).eq('room', room).limit(1);
+  if (error) throw error;
+  return data && data.length > 0;
+}
 
-    currentStudents.forEach(st => setStatus(st.no, s));
-
-    showToast(`✅ ตั้งค่า ${s === 'M' ? 'มาทั้งหมด' : s === 'K' ? 'ขาดทั้งหมด' : 'ลาทั้งหมด'} แล้ว`);
-  }
-
-  function clearAll(){
+async function openAttendance(room){
+  try {
+    currentRoom = room;
     currentAttendance = {};
-    document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
-    showToast('🧹 ล้างสถานะทั้งหมดแล้ว','#718096');
-  }
+    document.getElementById('currentRoom').textContent = room;
+    document.getElementById('attendanceDate').value = todayISO();
+    const dateISO = document.getElementById('attendanceDate').value;
 
-  function saveAttendance(){
-    const btn = document.getElementById('saveBtn');
-    const total = currentStudents.length;
-    const checked = Object.keys(currentAttendance).length;
-
-    if (checked < total) {
-      showToast(`⚠️ เช็คยังไม่ครบ (เหลือ ${total - checked} คน)`,'#dd6b20');
+    const exists = await checkAttendanceExists(dateISO, room);
+    if (exists) {
+      showToast('⚠️ วันนี้ห้องนี้เช็คแล้ว หากต้องการแก้ไขให้ไปที่เมนูแก้ไข','#dd6b20');
+      showPage('edit');
+      setTimeout(() => {
+        document.getElementById('editRoom').value = room;
+        document.getElementById('editDate').value = dateISO;
+      }, 200);
       return;
     }
 
-    const dateISO = document.getElementById('attendanceDate').value || new Date().toISOString().slice(0,10);
-
-    btn.disabled = true;
-    btn.textContent = 'กำลังบันทึก...';
-    btn.style.background = '#cbd5e0';
-
-    const entries = currentStudents.map(s => ({
-      no:s.no,
-      name:s.name,
-      status:currentAttendance[s.no] || 'M'
-    }));
-
-    google.script.run
-      .withSuccessHandler(res => {
-        if (res && res.ok) {
-          btn.textContent = '✅ บันทึกสำเร็จแล้ว!';
-          btn.style.background = '#38a169';
-          showToast(`🎉 บันทึกข้อมูลสำเร็จ ${res.saved} รายการ`);
-
-          setTimeout(() => {
-            btn.disabled = false;
-            btn.textContent = defaultConfig.save_button_text;
-            btn.style.background = '#667eea';
-          }, 2000);
-
-        } else {
-          btn.disabled = false;
-          btn.textContent = defaultConfig.save_button_text;
-          btn.style.background = '#667eea';
-          showToast('❌ บันทึกไม่สำเร็จ','#e53e3e');
-        }
-      })
-      .withFailureHandler(err => {
-        console.error(err);
-        btn.disabled = false;
-        btn.textContent = defaultConfig.save_button_text;
-        btn.style.background = '#667eea';
-        showToast('❌ เกิดข้อผิดพลาดระหว่างบันทึก','#e53e3e');
-      })
-      .saveAttendance(dateISO, currentRoom, entries);
+    currentStudents = await getStudents(room);
+    if (!currentStudents.length) showToast('⚠️ ไม่พบรายชื่อนักเรียนห้องนี้ใน Supabase','#dd6b20');
+    renderStudentList(currentStudents);
+    showPage('attendance');
+  } catch(err) {
+    console.error(err);
+    showToast('❌ โหลดข้อมูลไม่สำเร็จ: ' + err.message,'#e53e3e');
   }
+}
 
-  function initReportFilters(){
-    const sel = document.getElementById('reportRoom');
-    sel.innerHTML = '<option value="">ทุกห้อง</option>';
-
-    rooms.forEach(r => {
-      const o = document.createElement('option');
-      o.value = r;
-      o.textContent = r;
-      sel.appendChild(o);
-    });
-
-    const t = new Date();
-    const w = new Date();
-    w.setDate(t.getDate() - 7);
-
-    document.getElementById('reportStartDate').valueAsDate = w;
-    document.getElementById('reportEndDate').valueAsDate = t;
-  }
-
-  function generateReport(){
-    const room = document.getElementById('reportRoom').value;
-    const start = document.getElementById('reportStartDate').value;
-    const end = document.getElementById('reportEndDate').value;
-
-    if (!start || !end) {
-      showToast('⚠️ กรุณาเลือกช่วงวันที่','#dd6b20');
-      return;
-    }
-
-    google.script.run
-      .withSuccessHandler(res => {
-        if (!res || !res.ok || !Array.isArray(res.rows) || !res.rows.length) {
-          document.getElementById('reportResults').style.display = 'none';
-          showToast('ℹ️ ไม่พบข้อมูลในช่วงที่เลือก','#718096');
-          lastReportData = [];
-          return;
-        }
-
-        lastReportData = res.rows.slice();
-        renderReport(res.rows);
-      })
-      .withFailureHandler(err => {
-        console.error(err);
-        showToast('❌ สร้างรายงานล้มเหลว','#e53e3e');
-      })
-      .getReport(room, start, end);
-  }
-
-  function renderReport(rows){
-    const totalPresent = rows.filter(r => r.status === 'M').length;
-    const totalAbsent = rows.filter(r => r.status === 'K').length;
-    const totalLeave = rows.filter(r => r.status === 'L').length;
-    const total = rows.length;
-    const rate = total ? ((totalPresent / total) * 100).toFixed(1) : '0.0';
-
-    document.getElementById('kpiGrid').innerHTML = `
-      <div class="kpi-card">
-        <div class="kpi-value">${rate}%</div>
-        <div class="kpi-label">เปอร์เซ็นต์การมาเรียน</div>
+function renderStudentList(students){
+  const wrap = document.getElementById('studentList');
+  wrap.innerHTML = '';
+  students.forEach(st => {
+    const div = document.createElement('div');
+    div.className = 'student-item';
+    div.innerHTML = `
+      <div class="student-info">
+        <div class="student-no">${st.no}</div>
+        <div class="student-name">${st.name}</div>
       </div>
+      <div class="status-buttons">
+        <button class="status-btn present" onclick="setStatus(${st.no},'M')" data-student="${st.no}" data-status="present">${defaultConfig.present_text}</button>
+        <button class="status-btn absent" onclick="setStatus(${st.no},'K')" data-student="${st.no}" data-status="absent">${defaultConfig.absent_text}</button>
+        <button class="status-btn leave" onclick="setStatus(${st.no},'L')" data-student="${st.no}" data-status="leave">${defaultConfig.leave_text}</button>
+      </div>`;
+    wrap.appendChild(div);
+  });
+}
 
-      <div class="kpi-card">
-        <div class="kpi-value">${totalPresent}</div>
-        <div class="kpi-label">มาเรียนทั้งหมด</div>
-      </div>
+function setStatus(no, s){
+  currentAttendance[no] = s;
+  document.querySelectorAll(`[data-student="${no}"]`).forEach(b => b.classList.remove('active'));
+  const map = {M:'present',K:'absent',L:'leave'};
+  const active = document.querySelector(`[data-student="${no}"][data-status="${map[s]}"]`);
+  if (active) active.classList.add('active');
+}
 
-      <div class="kpi-card">
-        <div class="kpi-value">${totalAbsent}</div>
-        <div class="kpi-label">ขาดเรียนทั้งหมด</div>
-      </div>
+function markAll(s){
+  if (!currentStudents.length) return;
+  currentStudents.forEach(st => setStatus(st.no, s));
+  showToast(`✅ ตั้งค่า ${s === 'M' ? 'มาทั้งหมด' : s === 'K' ? 'ขาดทั้งหมด' : 'ลาทั้งหมด'} แล้ว`);
+}
 
-      <div class="kpi-card">
-        <div class="kpi-value">${totalLeave}</div>
-        <div class="kpi-label">ลาทั้งหมด</div>
-      </div>
-    `;
+function clearAll(){
+  currentAttendance = {};
+  document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+  showToast('🧹 ล้างสถานะทั้งหมดแล้ว','#718096');
+}
 
-    const stats = {};
-
-    rows.forEach(r => {
-      const k = `${r.room}-${r.student_no}`;
-
-      if (!stats[k]) {
-        stats[k] = {
-          room:r.room,
-          no:r.student_no,
-          name:r.student_name,
-          present:0,
-          absent:0,
-          leave:0
-        };
-      }
-
-      if (r.status === 'M') stats[k].present++;
-      else if (r.status === 'K') stats[k].absent++;
-      else if (r.status === 'L') stats[k].leave++;
-    });
-
-    document.getElementById('reportTable').innerHTML = `
-      <thead>
-        <tr>
-          <th>ห้อง</th>
-          <th>เลขที่</th>
-          <th>ชื่อ-สกุล</th>
-          <th>มา</th>
-          <th>ขาด</th>
-          <th>ลา</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        ${Object.values(stats)
-          .sort((a,b) => a.room.localeCompare(b.room) || a.no - b.no)
-          .map(s => `
-            <tr>
-              <td>${s.room}</td>
-              <td>${s.no}</td>
-              <td>${s.name}</td>
-              <td style="color:#38a169;font-weight:600">${s.present}</td>
-              <td style="color:#e53e3e;font-weight:600">${s.absent}</td>
-              <td style="color:#dd6b20;font-weight:600">${s.leave}</td>
-            </tr>
-          `).join('')}
-      </tbody>
-    `;
-
-    renderDailyTable(rows);
-    document.getElementById('reportResults').style.display = 'block';
-    showToast('✅ สร้างรายงานสำเร็จ');
-  }
-
-  function renderDailyTable(rows){
-    const dateSet = new Set(rows.map(r => r.date).filter(Boolean));
-    const dates = Array.from(dateSet).sort();
-    const daily = document.getElementById('dailyReportTable');
-
-    if (!dates.length) {
-      daily.innerHTML = '<tr><td colspan="100%" style="text-align:center;color:#718096">ไม่มีข้อมูล</td></tr>';
-      return;
-    }
-
-    const byStudent = {};
-
-    rows.forEach(r => {
-      const k = `${r.room}|${r.student_no}|${r.student_name}`;
-
-      if (!byStudent[k]) {
-        byStudent[k] = {
-          room:r.room,
-          no:r.student_no,
-          name:r.student_name,
-          att:{}
-        };
-      }
-
-      byStudent[k].att[r.date] = r.status;
-    });
-
-    const sym = {
-      M:'✓',
-      K:'✗',
-      L:'ล'
-    };
-
-    const col = {
-      M:'#38a169',
-      K:'#e53e3e',
-      L:'#dd6b20'
-    };
-
-    daily.innerHTML = `
-      <thead>
-        <tr>
-          <th style="position:sticky;left:0;background:#f7fafc;z-index:10;min-width:80px">ห้อง</th>
-          <th style="position:sticky;left:80px;background:#f7fafc;z-index:10;min-width:60px">เลขที่</th>
-          <th style="position:sticky;left:140px;background:#f7fafc;z-index:10;min-width:200px">ชื่อ-สกุล</th>
-
-          ${dates.map(d => `
-            <th style="min-width:80px;text-align:center">
-              <div style="font-size:12px;color:#718096">${formatShortDate(d)}</div>
-              <div style="font-size:10px;color:#a0aec0">${formatThaiDay(d)}</div>
-            </th>
-          `).join('')}
-        </tr>
-      </thead>
-
-      <tbody>
-        ${Object.values(byStudent)
-          .sort((a,b) => a.room.localeCompare(b.room) || a.no - b.no)
-          .map(st => `
-            <tr>
-              <td style="position:sticky;left:0;background:#fff;z-index:5;font-weight:600">${st.room}</td>
-              <td style="position:sticky;left:80px;background:#fff;z-index:5;font-weight:600;text-align:center">${st.no}</td>
-              <td style="position:sticky;left:140px;background:#fff;z-index:5">${st.name}</td>
-
-              ${dates.map(d => {
-                const s = st.att[d];
-
-                if (!s) return '<td></td>';
-
-                return `<td style="text-align:center;font-weight:700;font-size:16px;color:${col[s] || '#cbd5e0'}">${sym[s] || '-'}</td>`;
-              }).join('')}
-            </tr>
-          `).join('')}
-      </tbody>
-    `;
-  }
-
-  function exportReport(){
-    const room = document.getElementById('reportRoom').value;
-    const start = document.getElementById('reportStartDate').value;
-    const end = document.getElementById('reportEndDate').value;
-
-    if (!start || !end) {
-      showToast('⚠️ ระบุช่วงวันที่ก่อนส่งออก','#dd6b20');
-      return;
-    }
-
-    google.script.run
-      .withSuccessHandler(csv => {
-        if (!csv) {
-          showToast('⚠️ ไม่มีข้อมูลส่งออก','#dd6b20');
-          return;
-        }
-
-        const blob = new Blob(['\ufeff' + csv], {
-          type:'text/csv;charset=utf-8;'
-        });
-
-        const link = document.createElement('a');
-
-        link.href = URL.createObjectURL(blob);
-        link.download = `รายงานการเข้าร่วมกิจกรรมหน้าเสาธง_ม4_${new Date().toISOString().slice(0,10)}.csv`;
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        showToast('✅ ส่งออกไฟล์สำเร็จ');
-      })
-      .withFailureHandler(err => {
-        console.error(err);
-        showToast('❌ ส่งออกล้มเหลว','#e53e3e');
-      })
-      .exportReportCSV(room, start, end);
-  }
-
-  function exportReportPDF(){
-  if (!lastReportData || !lastReportData.length) {
-    showToast('⚠️ กรุณากดแสดงข้อมูลรายงานก่อนส่งออก PDF','#dd6b20');
+async function saveAttendance(){
+  const btn = document.getElementById('saveBtn');
+  const total = currentStudents.length;
+  const checked = Object.keys(currentAttendance).length;
+  if (checked < total) {
+    showToast(`⚠️ เช็คยังไม่ครบ (เหลือ ${total - checked} คน)`,'#dd6b20');
     return;
   }
 
+  const dateISO = document.getElementById('attendanceDate').value || todayISO();
+  btn.disabled = true;
+  btn.textContent = 'กำลังบันทึก...';
+  btn.style.background = '#cbd5e0';
+
+  try {
+    ensureDb();
+    const rows = currentStudents.map(s => ({
+      date: dateISO,
+      room: currentRoom,
+      student_no: Number(s.no),
+      student_name: s.name,
+      status: normalizeStatus(currentAttendance[s.no] || 'M')
+    }));
+
+    const { error } = await db.from('attendance').upsert(rows, { onConflict:'date,room,student_no' });
+    if (error) throw error;
+
+    btn.textContent = '✅ บันทึกสำเร็จแล้ว!';
+    btn.style.background = '#38a169';
+    showToast(`🎉 บันทึกข้อมูลสำเร็จ ${rows.length} รายการ`);
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = defaultConfig.save_button_text;
+      btn.style.background = '#667eea';
+    }, 1800);
+  } catch(err) {
+    console.error(err);
+    btn.disabled = false;
+    btn.textContent = defaultConfig.save_button_text;
+    btn.style.background = '#667eea';
+    showToast('❌ บันทึกไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+function fillRoomSelect(id, firstText){
+  const sel = document.getElementById(id);
+  sel.innerHTML = `<option value="">${firstText}</option>`;
+  rooms.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r; o.textContent = r; sel.appendChild(o);
+  });
+}
+
+function initReportFilters(){
+  fillRoomSelect('reportRoom','ทุกห้อง');
+  const t = new Date();
+  const w = new Date();
+  w.setDate(t.getDate() - 7);
+  document.getElementById('reportStartDate').value = toISODate(w);
+  document.getElementById('reportEndDate').value = toISODate(t);
+}
+
+async function getReport(roomOrEmpty, startISO, endISO){
+  ensureDb();
+  let q = db.from('attendance')
+    .select('date,room,student_no,student_name,status,timestamp')
+    .gte('date', startISO)
+    .lte('date', endISO)
+    .order('date', {ascending:true})
+    .order('room', {ascending:true})
+    .order('student_no', {ascending:true});
+  if (roomOrEmpty) q = q.eq('room', roomOrEmpty);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data || []).map(r => ({...r, status:normalizeStatus(r.status)}));
+}
+
+async function generateReport(){
+  const room = document.getElementById('reportRoom').value;
+  const start = document.getElementById('reportStartDate').value;
+  const end = document.getElementById('reportEndDate').value;
+  if (!start || !end) return showToast('⚠️ กรุณาเลือกช่วงวันที่','#dd6b20');
+
+  try {
+    const rows = await getReport(room, start, end);
+    if (!rows.length) {
+      document.getElementById('reportResults').style.display = 'none';
+      lastReportData = [];
+      return showToast('ℹ️ ไม่พบข้อมูลในช่วงที่เลือก','#718096');
+    }
+    lastReportData = rows.slice();
+    renderReport(rows);
+  } catch(err) {
+    console.error(err);
+    showToast('❌ สร้างรายงานล้มเหลว: ' + err.message,'#e53e3e');
+  }
+}
+
+function renderReport(rows){
+  const totalPresent = rows.filter(r => r.status === 'M').length;
+  const totalAbsent = rows.filter(r => r.status === 'K').length;
+  const totalLeave = rows.filter(r => r.status === 'L').length;
+  const total = rows.length;
+  const rate = total ? ((totalPresent / total) * 100).toFixed(1) : '0.0';
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-value">${rate}%</div><div class="kpi-label">เปอร์เซ็นต์การมาเรียน</div></div>
+    <div class="kpi-card"><div class="kpi-value">${totalPresent}</div><div class="kpi-label">มาเรียนทั้งหมด</div></div>
+    <div class="kpi-card"><div class="kpi-value">${totalAbsent}</div><div class="kpi-label">ขาดเรียนทั้งหมด</div></div>
+    <div class="kpi-card"><div class="kpi-value">${totalLeave}</div><div class="kpi-label">ลาทั้งหมด</div></div>`;
+
+  const stats = {};
+  rows.forEach(r => {
+    const k = `${r.room}-${r.student_no}`;
+    if (!stats[k]) stats[k] = {room:r.room,no:r.student_no,name:r.student_name,present:0,absent:0,leave:0};
+    if (r.status === 'M') stats[k].present++;
+    else if (r.status === 'K') stats[k].absent++;
+    else if (r.status === 'L') stats[k].leave++;
+  });
+
+  document.getElementById('reportTable').innerHTML = `
+    <thead><tr><th>ห้อง</th><th>เลขที่</th><th>ชื่อ-สกุล</th><th>มา</th><th>ขาด</th><th>ลา</th></tr></thead>
+    <tbody>${Object.values(stats).sort((a,b)=>a.room.localeCompare(b.room)||a.no-b.no).map(s => `
+      <tr><td>${s.room}</td><td>${s.no}</td><td>${s.name}</td>
+      <td style="color:#38a169;font-weight:600">${s.present}</td>
+      <td style="color:#e53e3e;font-weight:600">${s.absent}</td>
+      <td style="color:#dd6b20;font-weight:600">${s.leave}</td></tr>`).join('')}</tbody>`;
+  renderDailyTable(rows);
+  document.getElementById('reportResults').style.display = 'block';
+  showToast('✅ สร้างรายงานสำเร็จ');
+}
+
+function renderDailyTable(rows){
+  const dates = [...new Set(rows.map(r => r.date).filter(Boolean))].sort();
+  const daily = document.getElementById('dailyReportTable');
+  if (!dates.length) {
+    daily.innerHTML = '<tr><td colspan="100%" style="text-align:center;color:#718096">ไม่มีข้อมูล</td></tr>';
+    return;
+  }
+
+  const byStudent = {};
+  rows.forEach(r => {
+    const k = `${r.room}|${r.student_no}|${r.student_name}`;
+    if (!byStudent[k]) byStudent[k] = {room:r.room,no:r.student_no,name:r.student_name,att:{}};
+    byStudent[k].att[r.date] = r.status;
+  });
+  const sym = {M:'✓',K:'✗',L:'ล'};
+  const col = {M:'#38a169',K:'#e53e3e',L:'#dd6b20'};
+
+  daily.innerHTML = `
+    <thead><tr>
+      <th style="position:sticky;left:0;background:#f7fafc;z-index:10;min-width:80px">ห้อง</th>
+      <th style="position:sticky;left:80px;background:#f7fafc;z-index:10;min-width:60px">เลขที่</th>
+      <th style="position:sticky;left:140px;background:#f7fafc;z-index:10;min-width:200px">ชื่อ-สกุล</th>
+      ${dates.map(d=>`<th style="min-width:80px;text-align:center"><div style="font-size:12px;color:#718096">${formatShortDate(d)}</div><div style="font-size:10px;color:#a0aec0">${formatThaiDay(d)}</div></th>`).join('')}
+    </tr></thead>
+    <tbody>${Object.values(byStudent).sort((a,b)=>a.room.localeCompare(b.room)||a.no-b.no).map(st => `
+      <tr>
+        <td style="position:sticky;left:0;background:#fff;z-index:5;font-weight:600">${st.room}</td>
+        <td style="position:sticky;left:80px;background:#fff;z-index:5;font-weight:600;text-align:center">${st.no}</td>
+        <td style="position:sticky;left:140px;background:#fff;z-index:5">${st.name}</td>
+        ${dates.map(d => {
+          const s = st.att[d];
+          return s ? `<td style="text-align:center;font-weight:700;font-size:16px;color:${col[s] || '#cbd5e0'}">${sym[s] || '-'}</td>` : '<td></td>';
+        }).join('')}
+      </tr>`).join('')}</tbody>`;
+}
+
+function exportReport(){
+  if (!lastReportData.length) return showToast('⚠️ กรุณากดแสดงข้อมูลก่อนส่งออก','#dd6b20');
+  const dates = [...new Set(lastReportData.map(r => r.date))].sort();
+  const byStu = {};
+  lastReportData.forEach(r => {
+    const key = `${r.room}|${r.student_no}|${r.student_name}`;
+    if (!byStu[key]) byStu[key] = {room:r.room,no:r.student_no,name:r.student_name,att:{},M:0,K:0,L:0};
+    byStu[key].att[r.date] = r.status;
+    byStu[key][r.status] = (byStu[key][r.status] || 0) + 1;
+  });
+
+  const text = {M:'มา',K:'ขาด',L:'ลา'};
+  const header = ['ห้อง','เลขที่','ชื่อ-สกุล',...dates.map(formatDateTH),'มา(ครั้ง)','ขาด(ครั้ง)','ลา(ครั้ง)','รวมทั้งหมด'];
+  const body = Object.values(byStu).sort((a,b)=>a.room.localeCompare(b.room)||a.no-b.no).map(st => [
+    st.room, st.no, st.name, ...dates.map(d => text[st.att[d]] || ''), st.M, st.K, st.L, st.M + st.K + st.L
+  ]);
+
+  const csv = [header, ...body].map(row => row.map(v => {
+    const s = String(v ?? '');
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+  }).join(',')).join('\n');
+
+  const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `รายงานการเข้าร่วมกิจกรรมหน้าเสาธง_ม4_${todayISO()}.csv`;
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  showToast('✅ ส่งออกไฟล์สำเร็จ');
+}
+
+function exportReportPDF(){
+  if (!lastReportData.length) return showToast('⚠️ กรุณากดแสดงข้อมูลรายงานก่อนส่งออก PDF','#dd6b20');
   const room = document.getElementById('reportRoom').value || 'ทุกห้อง';
   const start = document.getElementById('reportStartDate').value;
   const end = document.getElementById('reportEndDate').value;
-
   const rows = lastReportData.slice();
-
   const stats = {};
-  const uniqueDates = [...new Set(rows.map(r => r.date))];
-  const totalDays = uniqueDates.length;
+  const totalDays = [...new Set(rows.map(r => r.date))].length || 1;
 
   rows.forEach(r => {
     const key = `${r.room}|${r.student_no}|${r.student_name}`;
-
-    if (!stats[key]) {
-  stats[key] = {
-    room:r.room,
-    no:r.student_no,
-    name:r.student_name,
-    M:0,
-    K:0,
-    L:0,
-    percent:0
-  };
-}
-
-    if (r.status === 'M') stats[key].M++;
-    else if (r.status === 'K') stats[key].K++;
-    else if (r.status === 'L') stats[key].L++;
+    if (!stats[key]) stats[key] = {room:r.room,no:r.student_no,name:r.student_name,M:0,K:0,L:0};
+    stats[key][r.status] = (stats[key][r.status] || 0) + 1;
   });
 
-  const html = `
-<!doctype html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<title>รายงานการเข้าร่วมกิจกรรมหน้าเสาธง</title>
+  const allStats = Object.values(stats).sort((a,b)=>a.room.localeCompare(b.room)||a.no-b.no);
+  const rowsHtml = arr => arr.map(s => {
+    const pct = ((s.M / totalDays) * 100).toFixed(1);
+    return `<tr><td class="center">${s.room}</td><td class="center">${s.no}</td><td>${s.name}</td><td class="center">${s.M}</td><td class="center">${s.K}</td><td class="center">${s.L}</td><td class="center" style="${pct < 80 ? 'background:#fee2e2;color:#b91c1c;font-weight:800;' : ''}">${pct}%</td></tr>`;
+  }).join('');
 
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-<style>
-  @page {
-    size: A4 portrait;
-    margin: 14mm 12mm 16mm 12mm;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'Sarabun', sans-serif;
-    color: #111827;
-    font-size: 13px;
-    line-height: 1.35;
-  }
-
-  .header {
-    text-align: center;
-    margin-bottom: 14px;
-  }
-
-  .header h1 {
-    font-size: 22px;
-    margin: 0 0 4px 0;
-  }
-
-  .header div {
-    font-size: 14px;
-    margin-top: 2px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    page-break-inside: auto;
-  }
-
-  tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
-
-  th, td {
-    border: 1px solid #333;
-    padding: 6px 7px;
-    vertical-align: middle;
-  }
-
-  th {
-    background: #e5e7eb;
-    font-weight: 700;
-    text-align: center;
-  }
-
-  td.center {
-    text-align: center;
-  }
-
-  .summary-title {
-    font-size: 16px;
-    font-weight: 800;
-    margin: 14px 0 8px 0;
-  }
-
-  .signature-section {
-    margin-top: 45px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    page-break-inside: avoid;
-  }
-
-  .signature-box {
-    text-align: center;
-    min-height: 110px;
-  }
-
-  .sign-line {
-    margin-top: 45px;
-  }
-
-  .credit {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 11px;
-    color: #555;
-  }
-</style>
-</head>
-
-<body>
-  <div class="header">
-    <h1>รายงานสรุปการเข้าร่วมกิจกรรมหน้าเสาธง</h1>
-    <div>โรงเรียนหนองหานวิทยา</div>
-    <div>ระดับชั้นมัธยมศึกษาปีที่ 4 | ห้อง: ${room}</div>
-    <div>ช่วงวันที่ ${formatDateTH(start)} ถึง ${formatDateTH(end)}</div>
-  </div>
-
-  <div class="summary-title">ตารางสรุปการเข้าร่วมกิจกรรมหน้าเสาธงรายบุคคล</div>
-
-  <table>
-    <thead>
-      <tr>
-        <th style="width:14%">ห้อง</th>
-        <th style="width:10%">เลขที่</th>
-        <th>ชื่อ-สกุล</th>
-        <th style="width:12%">มา</th>
-        <th style="width:12%">ขาด</th>
-        <th style="width:12%">ลา</th>
-        <th style="width:16%">ร้อยละการมาเรียน</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      ${Object.values(stats)
-        .sort((a,b) => a.room.localeCompare(b.room) || a.no - b.no)
-        .map(s => `
-          <tr>
-            <td class="center">${s.room}</td>
-            <td class="center">${s.no}</td>
-            <td>${s.name}</td>
-            <td class="center">${s.M}</td>
-            <td class="center">${s.K}</td>
-            <td class="center">${s.L}</td>
-<td class="center" style="
-  ${((s.M / totalDays) * 100) < 80 
-    ? 'background:#fee2e2;color:#b91c1c;font-weight:800;' 
-    : ''}
-">
-  ${((s.M / totalDays) * 100).toFixed(1)}%
-</td>
-          </tr>
-        `).join('')}
-    </tbody>
-  </table>
-
-  <div class="signature-section">
-    <div class="signature-box">
-      <div class="sign-line">ลงชื่อ....................................................</div>
-      <div>(....................................................)</div>
-      <div>ครูที่ปรึกษา</div>
-    </div>
-
-    <div class="signature-box">
-      <div class="sign-line">ลงชื่อ....................................................</div>
-      <div>(....................................................)</div>
-      <div>ครูที่ปรึกษา</div>
-    </div>
-  </div>
-    <div style="page-break-before: always;"></div>
-
-  <div class="header">
-    <h1>รายงานนักเรียนเข้าร่วมกิจกรรมหน้าเสาธง ไม่ถึงร้อยละ 80</h1>
-    <div>โรงเรียนหนองหานวิทยา</div>
-    <div>ระดับชั้นมัธยมศึกษาปีที่ 4 | ห้อง: ${room}</div>
-    <div>ช่วงวันที่ ${formatDateTH(start)} ถึง ${formatDateTH(end)}</div>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th style="width:14%">ห้อง</th>
-        <th style="width:10%">เลขที่</th>
-        <th>ชื่อ-สกุล</th>
-        <th style="width:12%">มา</th>
-        <th style="width:12%">ขาด</th>
-        <th style="width:12%">ลา</th>
-        <th style="width:16%">ร้อยละ</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      ${Object.values(stats)
-        .filter(s => ((s.M / totalDays) * 100) < 80)
-        .sort((a,b) => a.room.localeCompare(b.room) || a.no - b.no)
-        .map(s => `
-          <tr>
-            <td class="center">${s.room}</td>
-            <td class="center">${s.no}</td>
-            <td>${s.name}</td>
-            <td class="center">${s.M}</td>
-            <td class="center">${s.K}</td>
-            <td class="center">${s.L}</td>
-            <td class="center" style="background:#fee2e2;font-weight:800;">
-              ${((s.M / totalDays) * 100).toFixed(1)}%
-            </td>
-          </tr>
-        `).join('') || `
-          <tr>
-            <td colspan="7" class="center" style="padding:20px;">
-              ไม่พบนักเรียนที่เข้าร่วมกิจกรรมต่ำกว่าร้อยละ 80
-            </td>
-          </tr>
-        `}
-    </tbody>
-  </table>
-
-  <div class="signature-section">
-    <div class="signature-box">
-      <div class="sign-line">ลงชื่อ....................................................</div>
-      <div>(....................................................)</div>
-      <div>ครูที่ปรึกษา</div>
-    </div>
-
-    <div class="signature-box">
-      <div class="sign-line">ลงชื่อ....................................................</div>
-      <div>(....................................................)</div>
-      <div>ครูที่ปรึกษา</div>
-    </div>
-  </div>
-
-  <div class="credit"></div>
-
-  <script>
-    window.onload = function(){
-      window.print();
-    };
-  <\/script>
-</body>
-</html>
-`;
+  const low = allStats.filter(s => ((s.M / totalDays) * 100) < 80);
+  const html = `<!doctype html><html lang="th"><head><meta charset="UTF-8"><title>รายงาน</title><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"><style>
+    @page{size:A4 portrait;margin:14mm 12mm 16mm}*{box-sizing:border-box}body{font-family:'Sarabun',sans-serif;color:#111827;font-size:13px;line-height:1.35}.header{text-align:center;margin-bottom:14px}.header h1{font-size:22px;margin:0 0 4px}table{width:100%;border-collapse:collapse}tr{page-break-inside:avoid}th,td{border:1px solid #333;padding:6px 7px;vertical-align:middle}th{background:#e5e7eb;font-weight:700;text-align:center}.center{text-align:center}.summary-title{font-size:16px;font-weight:800;margin:14px 0 8px}.signature-section{margin-top:45px;display:grid;grid-template-columns:1fr 1fr;gap:30px;page-break-inside:avoid}.signature-box{text-align:center;min-height:110px}.sign-line{margin-top:45px}
+  </style></head><body>
+    <div class="header"><h1>รายงานสรุปการเข้าร่วมกิจกรรมหน้าเสาธง</h1><div>โรงเรียนหนองหานวิทยา</div><div>ระดับชั้นมัธยมศึกษาปีที่ 4 | ห้อง: ${room}</div><div>ช่วงวันที่ ${formatDateTH(start)} ถึง ${formatDateTH(end)}</div></div>
+    <div class="summary-title">ตารางสรุปรายบุคคล</div>
+    <table><thead><tr><th>ห้อง</th><th>เลขที่</th><th>ชื่อ-สกุล</th><th>มา</th><th>ขาด</th><th>ลา</th><th>ร้อยละการมาเรียน</th></tr></thead><tbody>${rowsHtml(allStats)}</tbody></table>
+    <div class="signature-section"><div class="signature-box"><div class="sign-line">ลงชื่อ....................................................</div><div>(....................................................)</div><div>ครูที่ปรึกษา</div></div><div class="signature-box"><div class="sign-line">ลงชื่อ....................................................</div><div>(....................................................)</div><div>ครูที่ปรึกษา</div></div></div>
+    <div style="page-break-before:always"></div>
+    <div class="header"><h1>รายงานนักเรียนเข้าร่วมกิจกรรมหน้าเสาธง ไม่ถึงร้อยละ 80</h1><div>โรงเรียนหนองหานวิทยา</div><div>ระดับชั้นมัธยมศึกษาปีที่ 4 | ห้อง: ${room}</div><div>ช่วงวันที่ ${formatDateTH(start)} ถึง ${formatDateTH(end)}</div></div>
+    <table><thead><tr><th>ห้อง</th><th>เลขที่</th><th>ชื่อ-สกุล</th><th>มา</th><th>ขาด</th><th>ลา</th><th>ร้อยละ</th></tr></thead><tbody>${low.length ? rowsHtml(low) : '<tr><td colspan="7" class="center" style="padding:20px">ไม่พบนักเรียนที่เข้าร่วมกิจกรรมต่ำกว่าร้อยละ 80</td></tr>'}</tbody></table>
+    <div class="signature-section"><div class="signature-box"><div class="sign-line">ลงชื่อ....................................................</div><div>(....................................................)</div><div>ครูที่ปรึกษา</div></div><div class="signature-box"><div class="sign-line">ลงชื่อ....................................................</div><div>(....................................................)</div><div>ครูที่ปรึกษา</div></div></div>
+    <script>window.onload=function(){window.print()};<\/script></body></html>`;
 
   const win = window.open('', '_blank');
-
-  if (!win) {
-    showToast('⚠️ กรุณาอนุญาต Pop-up เพื่อเปิดหน้าพิมพ์ PDF','#dd6b20');
-    return;
-  }
-
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+  if (!win) return showToast('⚠️ กรุณาอนุญาต Pop-up เพื่อเปิดหน้าพิมพ์ PDF','#dd6b20');
+  win.document.open(); win.document.write(html); win.document.close();
 }
 
-  function initStatusFilters(){
-    document.getElementById('statusDate').value = new Date().toISOString().slice(0,10);
-    loadStatusCustom();
+function initStatusFilters(){
+  document.getElementById('statusDate').value = todayISO();
+  loadStatusCustom();
+}
+
+function loadStatusToday(){
+  document.getElementById('statusDate').value = todayISO();
+  loadStatus(todayISO());
+}
+
+function loadStatusCustom(){
+  const d = document.getElementById('statusDate').value;
+  if (!d) return showToast('⚠️ กรุณาเลือกวันที่','#dd6b20');
+  loadStatus(d);
+}
+
+async function loadStatus(dateISO){
+  try {
+    ensureDb();
+    const { data, error } = await db.from('attendance').select('room').eq('date', dateISO);
+    if (error) throw error;
+    const seen = {};
+    (data || []).forEach(r => seen[r.room] = (seen[r.room] || 0) + 1);
+    renderStatusGrid(rooms.map(room => ({room, submitted:!!seen[room], count:seen[room] || 0})));
+  } catch(err) {
+    console.error(err);
+    showToast('❌ โหลดสถานะล้มเหลว: ' + err.message,'#e53e3e');
   }
+}
 
-  function loadStatusToday(){
-    const today = new Date().toISOString().slice(0,10);
-    document.getElementById('statusDate').value = today;
-    loadStatus(today);
-  }
+function renderStatusGrid(rows){
+  const grid = document.getElementById('statusGrid');
+  grid.innerHTML = '';
+  rows.forEach(r => {
+    const card = document.createElement('div');
+    card.className = `status-card ${r.submitted ? 'status-ok' : 'status-miss'}`;
+    card.innerHTML = `<div style="font-size:36px;line-height:1">${r.submitted ? '✅' : '⛔'}</div><div class="status-room">${r.room}</div><div class="status-count">${r.submitted ? `บันทึก ${r.count} รายการ` : 'ยังไม่ส่งข้อมูล'}</div>`;
+    grid.appendChild(card);
+  });
+}
 
-  function loadStatusCustom(){
-    const d = document.getElementById('statusDate').value;
-
-    if (!d) {
-      showToast('⚠️ กรุณาเลือกวันที่','#dd6b20');
-      return;
-    }
-
-    loadStatus(d);
-  }
-
-  function loadStatus(dateISO){
-    google.script.run
-      .withSuccessHandler(res => {
-        if (!res || !res.ok) {
-          showToast('❌ โหลดสถานะล้มเหลว','#e53e3e');
-          return;
-        }
-
-        renderStatusGrid(res.rows || []);
-      })
-      .withFailureHandler(err => {
-        console.error(err);
-        showToast('❌ โหลดสถานะล้มเหลว','#e53e3e');
-      })
-      .getSubmissionStatus(dateISO);
-  }
-
-  function renderStatusGrid(rows){
-    const grid = document.getElementById('statusGrid');
-    grid.innerHTML = '';
-
-    if (!rows.length) {
-      grid.innerHTML = `
-        <div class="empty-state" style="grid-column:1/-1">
-          <div class="empty-icon">🗂️</div>
-          <div class="empty-text">ไม่มีข้อมูล</div>
-        </div>
-      `;
-      return;
-    }
-
-    rows.forEach(r => {
-      const card = document.createElement('div');
-      card.className = `status-card ${r.submitted ? 'status-ok' : 'status-miss'}`;
-
-      card.innerHTML = `
-        <div style="font-size:36px;line-height:1">${r.submitted ? '✅' : '⛔'}</div>
-        <div class="status-room">${r.room}</div>
-        <div class="status-count">${r.submitted ? `บันทึก ${r.count} รายการ` : 'ยังไม่ส่งข้อมูล'}</div>
-      `;
-
-      grid.appendChild(card);
-    });
-  }
-  function getMondayOfWeek(dateStr){
-  const parts = dateStr.split('-');
-
-  const d = new Date(
-    Number(parts[0]),
-    Number(parts[1]) - 1,
-    Number(parts[2])
-  );
-
-  const day = d.getDay();
-
+function getMondayOfWeek(dateStr){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  const day = date.getDay();
   const diff = day === 0 ? -6 : 1 - day;
-
-  d.setDate(d.getDate() + diff);
-
-  return d;
+  date.setDate(date.getDate() + diff);
+  return date;
 }
 
 function addDays(date, days){
@@ -1689,431 +615,239 @@ function addDays(date, days){
 }
 
 function toISODate(date){
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2,'0');
-  const d = String(date.getDate()).padStart(2,'0');
-
-  return `${y}-${m}-${d}`;
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 
-function loadWeeklyStatus(){
-  const selectedDate = document.getElementById('statusDate').value || new Date().toISOString().slice(0,10);
+async function loadWeeklyStatus(){
+  const selectedDate = document.getElementById('statusDate').value || todayISO();
   const monday = getMondayOfWeek(selectedDate);
-
-  const weekDates = [
-    toISODate(monday),
-    toISODate(addDays(monday,1)),
-    toISODate(addDays(monday,2)),
-    toISODate(addDays(monday,3)),
-    toISODate(addDays(monday,4))
-  ];
-
-  google.script.run
-    .withSuccessHandler(res => {
-      if (!res || !res.ok) {
-        showToast('❌ โหลดสรุปรายสัปดาห์ไม่สำเร็จ','#e53e3e');
-        return;
-      }
-
-      renderWeeklyStatus(res.rows || [], weekDates);
-    })
-    .withFailureHandler(err => {
-      console.error(err);
-      showToast('❌ โหลดสรุปรายสัปดาห์ไม่สำเร็จ','#e53e3e');
-    })
-    .getWeeklySubmissionStatus(weekDates);
+  const weekDates = [0,1,2,3,4].map(i => toISODate(addDays(monday, i)));
+  try {
+    ensureDb();
+    const { data, error } = await db.from('attendance').select('date,room').in('date', weekDates);
+    if (error) throw error;
+    const rows = rooms.map(room => {
+      const days = {};
+      weekDates.forEach(dateISO => {
+        const count = (data || []).filter(r => r.room === room && r.date === dateISO).length;
+        days[dateISO] = {submitted:count > 0, count};
+      });
+      return {room, days};
+    });
+    renderWeeklyStatus(rows, weekDates);
+  } catch(err) {
+    console.error(err);
+    showToast('❌ โหลดสรุปรายสัปดาห์ไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
 }
 
 function renderWeeklyStatus(rows, weekDates){
   const box = document.getElementById('weeklyStatusBox');
   const content = document.getElementById('weeklyStatusContent');
-
   const dayNames = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์'];
-
   content.innerHTML = `
     <div id="weeklyCaptureArea" style="background:#fff;padding:20px;border-radius:16px">
       <div style="text-align:center;margin-bottom:18px">
-        <div style="font-size:26px;font-weight:900;color:#2d3748">
-          สรุปสถานะการเช็คชื่อรายสัปดาห์
-        </div>
-        <div style="font-size:16px;color:#4a5568;margin-top:4px">
-          วันที่ ${formatDateTH(weekDates[0])} ถึง ${formatDateTH(weekDates[4])}
-        </div>
-        <div style="font-size:13px;color:#718096;margin-top:3px">
-          พัฒนาระบบโดยครูดิว
-        </div>
+        <div style="font-size:26px;font-weight:900;color:#2d3748">สรุปสถานะการเช็คชื่อรายสัปดาห์</div>
+        <div style="font-size:16px;color:#4a5568;margin-top:4px">วันที่ ${formatDateTH(weekDates[0])} ถึง ${formatDateTH(weekDates[4])}</div>
+        <div style="font-size:13px;color:#718096;margin-top:3px">พัฒนาระบบโดยครูดิว</div>
       </div>
-
-      <div style="overflow-x:auto">
-        <table class="report-table" style="border-collapse:collapse;width:100%">
-          <thead>
-            <tr>
-              <th style="text-align:center;border:1px solid #cbd5e0;background:#edf2f7">ห้อง</th>
-              ${weekDates.map((d,i) => `
-                <th style="text-align:center;border:1px solid #cbd5e0;background:#edf2f7">
-                  ${dayNames[i]}<br>
-                  <span style="font-size:12px;color:#718096">${formatDateTH(d)}</span>
-                </th>
-              `).join('')}
-              <th style="text-align:center;border:1px solid #cbd5e0;background:#edf2f7">สรุป</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            ${rows.map(r => {
-              const checkedCount = weekDates.filter(d => r.days[d] && r.days[d].submitted).length;
-
-              return `
-                <tr>
-                  <td style="text-align:center;font-weight:800;border:1px solid #cbd5e0">${r.room}</td>
-
-                  ${weekDates.map(d => {
-                    const checked = r.days[d] && r.days[d].submitted;
-                    const count = r.days[d] ? r.days[d].count : 0;
-
-                    return `
-                      <td style="
-                        text-align:center;
-                        border:1px solid #cbd5e0;
-                        background:${checked ? '#dcfce7' : '#fee2e2'};
-                        font-weight:800;
-                      ">
-                        ${checked ? 'เช็คแล้ว' : 'ยังไม่เช็ค'}
-                        <div style="font-size:11px;font-weight:500;color:#4a5568">
-                          ${checked ? count + ' รายการ' : '-'}
-                        </div>
-                      </td>
-                    `;
-                  }).join('')}
-
-                  <td style="text-align:center;font-weight:900;border:1px solid #cbd5e0">
-                    ${checkedCount}/5 วัน
-                  </td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-
+      <div style="overflow-x:auto"><table class="report-table" style="border-collapse:collapse;width:100%">
+        <thead><tr><th style="text-align:center;border:1px solid #cbd5e0;background:#edf2f7">ห้อง</th>${weekDates.map((d,i)=>`<th style="text-align:center;border:1px solid #cbd5e0;background:#edf2f7">${dayNames[i]}<br><span style="font-size:12px;color:#718096">${formatDateTH(d)}</span></th>`).join('')}<th style="text-align:center;border:1px solid #cbd5e0;background:#edf2f7">สรุป</th></tr></thead>
+        <tbody>${rows.map(r => {
+          const checkedCount = weekDates.filter(d => r.days[d] && r.days[d].submitted).length;
+          return `<tr><td style="text-align:center;font-weight:800;border:1px solid #cbd5e0">${r.room}</td>${weekDates.map(d => {
+            const checked = r.days[d] && r.days[d].submitted;
+            const count = r.days[d] ? r.days[d].count : 0;
+            return `<td style="text-align:center;border:1px solid #cbd5e0;background:${checked ? '#dcfce7' : '#fee2e2'};font-weight:800">${checked ? 'เช็คแล้ว' : 'ยังไม่เช็ค'}<div style="font-size:11px;font-weight:500;color:#4a5568">${checked ? count + ' รายการ' : '-'}</div></td>`;
+          }).join('')}<td style="text-align:center;font-weight:900;border:1px solid #cbd5e0">${checkedCount}/5 วัน</td></tr>`;
+        }).join('')}</tbody>
+      </table></div>
+    </div>`;
   box.style.display = 'block';
   showToast('✅ สรุปรายสัปดาห์สำเร็จ');
 }
 
 function exportWeeklyStatusImage(){
   const area = document.getElementById('weeklyCaptureArea');
-
-  if (!area) {
-    showToast('⚠️ กรุณากดสรุปสถานะรายสัปดาห์ก่อน','#dd6b20');
-    return;
-  }
-
+  if (!area) return showToast('⚠️ กรุณากดสรุปสถานะรายสัปดาห์ก่อน','#dd6b20');
   const script = document.createElement('script');
   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-
   script.onload = function(){
-    html2canvas(area, {
-      scale: 2,
-      backgroundColor: '#ffffff'
-    }).then(canvas => {
+    html2canvas(area, {scale:2, backgroundColor:'#ffffff'}).then(canvas => {
       const link = document.createElement('a');
-      link.download = `สรุปสถานะรายสัปดาห์_${new Date().toISOString().slice(0,10)}.png`;
+      link.download = `สรุปสถานะรายสัปดาห์_${todayISO()}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-
       showToast('✅ ส่งออกเป็นรูปภาพสำเร็จ');
     });
   };
-
   document.body.appendChild(script);
 }
 
-  function initEditFilters(){
-    const sel = document.getElementById('editRoom');
-    sel.innerHTML = '<option value="">เลือกห้อง</option>';
+function initEditFilters(){
+  fillRoomSelect('editRoom','เลือกห้อง');
+  document.getElementById('editDate').value = todayISO();
+  document.getElementById('editResults').innerHTML = '';
+  document.getElementById('editSaveBtn').style.display = 'none';
+}
 
-    rooms.forEach(r => {
-      const o = document.createElement('option');
-      o.value = r;
-      o.textContent = r;
-      sel.appendChild(o);
-    });
+async function loadEditDay(){
+  const room = document.getElementById('editRoom').value;
+  const dateISO = document.getElementById('editDate').value;
+  if (!room) return showToast('⚠️ กรุณาเลือกห้อง','#dd6b20');
+  if (!dateISO) return showToast('⚠️ กรุณาเลือกวันที่','#dd6b20');
 
-    document.getElementById('editDate').value = new Date().toISOString().slice(0,10);
-    document.getElementById('editResults').innerHTML = '';
-    document.getElementById('editSaveBtn').style.display = 'none';
-  }
-
-  function loadEditDay(){
-    const room = document.getElementById('editRoom').value;
-    const dateISO = document.getElementById('editDate').value;
-
-    if (!room) {
-      showToast('⚠️ กรุณาเลือกห้อง','#dd6b20');
-      return;
-    }
-
-    if (!dateISO) {
-      showToast('⚠️ กรุณาเลือกวันที่','#dd6b20');
-      return;
-    }
-
-    google.script.run
-      .withSuccessHandler(res => {
-        const wrap = document.getElementById('editResults');
-
-        if (!res || !res.ok) {
-          wrap.innerHTML = '';
-          showToast('❌ โหลดข้อมูลล้มเหลว','#e53e3e');
-          return;
-        }
-
-        const rows = (res.rows || []).filter(r => r.room === room && r.date === dateISO);
-
-        if (!rows.length) {
-          wrap.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon">📋</div>
-              <div class="empty-text">ไม่พบข้อมูลของวันที่เลือก</div>
-            </div>
-          `;
-
-          document.getElementById('editSaveBtn').style.display = 'none';
-          editState = {room:room, dateISO:dateISO, rows:[]};
-          return;
-        }
-
-        editState = {
-          room:room,
-          dateISO:dateISO,
-          rows:rows
-            .sort((a,b) => a.student_no - b.student_no)
-            .map(r => ({
-              no:r.student_no,
-              name:r.student_name,
-              status:r.status
-            }))
-        };
-
-        renderEditList();
-        document.getElementById('editSaveBtn').style.display = 'inline-block';
-        showToast('✅ โหลดรายการสำเร็จ');
-      })
-      .withFailureHandler(err => {
-        console.error(err);
-        showToast('❌ โหลดข้อมูลล้มเหลว','#e53e3e');
-      })
-      .getReport(room, dateISO, dateISO);
-  }
-
-  function renderEditList(){
+  try {
+    const rows = await getReport(room, dateISO, dateISO);
     const wrap = document.getElementById('editResults');
-
-    wrap.innerHTML = `
-      <div class="card">
-        ${editState.rows.map(r => `
-          <div class="edit-item">
-            <div class="edit-item-header">
-              <div class="edit-item-info">เลขที่ ${r.no} — ${r.name}</div>
-
-              <div class="status-buttons">
-                <button class="status-btn present ${r.status === 'M' ? 'active' : ''}" onclick="setEditStatus(${r.no},'M')">มา</button>
-                <button class="status-btn absent ${r.status === 'K' ? 'active' : ''}" onclick="setEditStatus(${r.no},'K')">ขาด</button>
-                <button class="status-btn leave ${r.status === 'L' ? 'active' : ''}" onclick="setEditStatus(${r.no},'L')">ลา</button>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-
-  function setEditStatus(no, s){
-    const row = editState.rows.find(x => x.no === no);
-
-    if (!row) return;
-
-    row.status = s;
-    renderEditList();
-  }
-
-  function saveEditedDay(){
-    if (!editState.rows.length) {
-      showToast('ℹ️ ไม่มีข้อมูลให้บันทึก','#718096');
+    if (!rows.length) {
+      wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">ไม่พบข้อมูลของวันที่เลือก</div></div>`;
+      document.getElementById('editSaveBtn').style.display = 'none';
+      editState = {room, dateISO, rows:[]};
       return;
     }
 
-    const btn = document.getElementById('editSaveBtn');
+    editState = {room, dateISO, rows:rows.sort((a,b)=>a.student_no-b.student_no).map(r => ({no:r.student_no,name:r.student_name,status:r.status}))};
+    renderEditList();
+    document.getElementById('editSaveBtn').style.display = 'inline-block';
+    showToast('✅ โหลดรายการสำเร็จ');
+  } catch(err) {
+    console.error(err);
+    showToast('❌ โหลดข้อมูลล้มเหลว: ' + err.message,'#e53e3e');
+  }
+}
 
-    btn.disabled = true;
-    btn.textContent = 'กำลังบันทึก...';
+function renderEditList(){
+  const wrap = document.getElementById('editResults');
+  wrap.innerHTML = `<div class="card">${editState.rows.map(r => `
+    <div class="edit-item"><div class="edit-item-header">
+      <div class="edit-item-info">เลขที่ ${r.no} — ${r.name}</div>
+      <div class="status-buttons">
+        <button class="status-btn present ${r.status === 'M' ? 'active' : ''}" onclick="setEditStatus(${r.no},'M')">มา</button>
+        <button class="status-btn absent ${r.status === 'K' ? 'active' : ''}" onclick="setEditStatus(${r.no},'K')">ขาด</button>
+        <button class="status-btn leave ${r.status === 'L' ? 'active' : ''}" onclick="setEditStatus(${r.no},'L')">ลา</button>
+      </div>
+    </div></div>`).join('')}</div>`;
+}
 
-    const entries = editState.rows.map(r => ({
-      no:r.no,
-      name:r.name,
-      status:r.status
+function setEditStatus(no, s){
+  const row = editState.rows.find(x => x.no === no);
+  if (!row) return;
+  row.status = s;
+  renderEditList();
+}
+
+async function saveEditedDay(){
+  if (!editState.rows.length) return showToast('ℹ️ ไม่มีข้อมูลให้บันทึก','#718096');
+  const btn = document.getElementById('editSaveBtn');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+
+  try {
+    ensureDb();
+    const rows = editState.rows.map(r => ({
+      date: editState.dateISO,
+      room: editState.room,
+      student_no: Number(r.no),
+      student_name: r.name,
+      status: normalizeStatus(r.status)
     }));
-
-    google.script.run
-      .withSuccessHandler(res => {
-        btn.disabled = false;
-        btn.textContent = 'บันทึกการแก้ไข';
-
-        if (res && res.ok) {
-          showToast('✅ บันทึกการแก้ไขสำเร็จ');
-          loadEditDay();
-        } else {
-          showToast('❌ บันทึกไม่สำเร็จ','#e53e3e');
-        }
-      })
-      .withFailureHandler(err => {
-        console.error(err);
-
-        btn.disabled = false;
-        btn.textContent = 'บันทึกการแก้ไข';
-
-        showToast('❌ เกิดข้อผิดพลาด','#e53e3e');
-      })
-      .saveAttendance(editState.dateISO, editState.room, entries);
+    const { error } = await db.from('attendance').upsert(rows, {onConflict:'date,room,student_no'});
+    if (error) throw error;
+    btn.disabled = false; btn.textContent = 'บันทึกการแก้ไข';
+    showToast('✅ บันทึกการแก้ไขสำเร็จ');
+    loadEditDay();
+  } catch(err) {
+    console.error(err);
+    btn.disabled = false; btn.textContent = 'บันทึกการแก้ไข';
+    showToast('❌ เกิดข้อผิดพลาด: ' + err.message,'#e53e3e');
   }
+}
 
-  function formatShortDate(s){
-    const d = new Date(s);
-    return `${d.getDate()}/${d.getMonth() + 1}`;
-  }
-
-  function formatThaiDay(s){
-    const d = new Date(s);
-    return ['อา','จ','อ','พ','พฤ','ศ','ส'][d.getDay()];
-  }
-
-  function formatDateTH(s){
-    if (!s) return '-';
-
-    const d = new Date(s + 'T00:00:00');
-
-    if (isNaN(d)) return s;
-
-    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear() + 543}`;
-  }
-
-  function showToast(msg, color = '#38a169'){
-    const t = document.getElementById('toast');
-
-    t.textContent = msg;
-    t.style.background = color;
-    t.classList.add('show');
-
-    setTimeout(() => {
-      t.classList.remove('show');
-    }, 2800);
-  }
-  function initBackdateFilters(){
-  const sel = document.getElementById('backdateRoom');
-  sel.innerHTML = '<option value="">เลือกห้อง</option>';
-
-  rooms.forEach(r => {
-    const o = document.createElement('option');
-    o.value = r;
-    o.textContent = r;
-    sel.appendChild(o);
-  });
-
+function initBackdateFilters(){
+  fillRoomSelect('backdateRoom','เลือกห้อง');
   const today = new Date();
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-
   document.getElementById('backdateStart').value = toISODate(firstDay);
   document.getElementById('backdateEnd').value = toISODate(today);
 }
-function loadMissingBackdate(){
+
+async function loadMissingBackdate(){
   const room = document.getElementById('backdateRoom').value;
   const start = document.getElementById('backdateStart').value;
   const end = document.getElementById('backdateEnd').value;
+  if (!room) return showToast('⚠️ กรุณาเลือกห้อง','#dd6b20');
+  if (!start || !end) return showToast('⚠️ กรุณาเลือกช่วงวันที่','#dd6b20');
 
-  if (!room) {
-    showToast('⚠️ กรุณาเลือกห้อง','#dd6b20');
-    return;
+  try {
+    const rows = await getReport(room, start, end);
+    const checked = new Set(rows.map(r => r.date));
+    const missingDates = [];
+    let d = new Date(start + 'T00:00:00');
+    const endD = new Date(end + 'T00:00:00');
+    while (d <= endD) {
+      const iso = toISODate(d);
+      const day = d.getDay();
+      if (day !== 0 && day !== 6 && !checked.has(iso)) missingDates.push(iso);
+      d.setDate(d.getDate() + 1);
+    }
+    renderMissingBackdate(room, missingDates);
+  } catch(err) {
+    console.error(err);
+    showToast('❌ โหลดข้อมูลไม่สำเร็จ: ' + err.message,'#e53e3e');
   }
-
-  if (!start || !end) {
-    showToast('⚠️ กรุณาเลือกช่วงวันที่','#dd6b20');
-    return;
-  }
-
-  google.script.run
-    .withSuccessHandler(res => {
-      if (!res || !res.ok) {
-        showToast('❌ โหลดข้อมูลไม่สำเร็จ','#e53e3e');
-        return;
-      }
-
-      renderMissingBackdate(room, res.missingDates || []);
-    })
-    .withFailureHandler(err => {
-      console.error(err);
-      showToast('❌ โหลดข้อมูลไม่สำเร็จ','#e53e3e');
-    })
-    .getMissingAttendanceDates(room, start, end);
 }
 
 function renderMissingBackdate(room, dates){
   const wrap = document.getElementById('backdateResults');
-
   if (!dates.length) {
-    wrap.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">✅</div>
-        <div class="empty-text">เช็คครบทุกวันแล้วในช่วงที่เลือก</div>
-      </div>
-    `;
+    wrap.innerHTML = `<div class="empty-state card"><div class="empty-icon">✅</div><div class="empty-text">ไม่พบวันที่ตกหล่นในช่วงที่เลือก</div></div>`;
     return;
   }
-
-  wrap.innerHTML = `
-    <div class="card">
-      <h2 style="margin-bottom:15px;font-size:24px;font-weight:800;color:#2d3748">
-        วันที่ยังไม่เช็คของ ${room}
-      </h2>
-
-      <div class="room-grid">
-        ${dates.map(d => `
-          <div class="room-card" onclick="openBackdateAttendance('${room}','${d}')">
-            <div class="room-icon">📅</div>
-            <div class="room-name" style="font-size:20px">${formatDateTH(d)}</div>
-            <div style="font-size:14px;color:#718096;margin-top:6px">
-              ${formatThaiDay(d)}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
+  wrap.innerHTML = `<div class="card"><h2 style="margin-bottom:16px">วันที่ยังไม่เช็คของ ${room}</h2><div class="room-grid">${dates.map(d => `
+    <div class="room-card" onclick="openBackdateAttendance('${room}','${d}')"><div class="room-icon">📅</div><div class="room-name" style="font-size:20px">${formatDateTH(d)}</div></div>
+  `).join('')}</div></div>`;
 }
 
-function openBackdateAttendance(room, dateISO){
-  currentRoom = room;
-  currentAttendance = {};
-
-  document.getElementById('currentRoom').textContent = room + ' | เช็คย้อนหลังวันที่ ' + formatDateTH(dateISO);
-  document.getElementById('attendanceDate').value = dateISO;
-
-  google.script.run
-    .withSuccessHandler(sts => {
-      currentStudents = sts || [];
-      renderStudentList(currentStudents);
-      showPage('attendance');
-    })
-    .withFailureHandler(e => {
-      console.error(e);
-      showToast('❌ โหลดรายชื่อนักเรียนไม่สำเร็จ','#e53e3e');
-    })
-    .getStudents(room);
+async function openBackdateAttendance(room, dateISO){
+  try {
+    currentRoom = room;
+    currentAttendance = {};
+    document.getElementById('currentRoom').textContent = `${room} | ${formatDateTH(dateISO)}`;
+    document.getElementById('attendanceDate').value = dateISO;
+    currentStudents = await getStudents(room);
+    renderStudentList(currentStudents);
+    showPage('attendance');
+  } catch(err) {
+    console.error(err);
+    showToast('❌ โหลดรายชื่อนักเรียนไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
 }
-  (function init(){
-    initRoomGrid();
-  })();
+
+function formatShortDate(s){
+  const d = new Date(s + 'T00:00:00');
+  return `${d.getDate()}/${d.getMonth() + 1}`;
+}
+
+function formatThaiDay(s){
+  const d = new Date(s + 'T00:00:00');
+  return ['อา','จ','อ','พ','พฤ','ศ','ส'][d.getDay()];
+}
+
+function formatDateTH(s){
+  if (!s) return '-';
+  const d = new Date(s + 'T00:00:00');
+  if (isNaN(d)) return s;
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear() + 543}`;
+}
+
+function showToast(msg, color = '#38a169'){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
 </script>
 </body>
 </html>
