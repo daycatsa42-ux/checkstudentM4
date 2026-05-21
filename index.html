@@ -66,6 +66,7 @@
       <button class="nav-btn" onclick="showPage('report')">รายงาน</button>
       <button class="nav-btn" onclick="showPage('status')">สถานะ</button>
       <button class="nav-btn" onclick="showPage('edit')">แก้ไข</button>
+      <button class="nav-btn" onclick="showPage('manage')">จัดการนักเรียน</button>
     </div>
   </nav>
 
@@ -157,6 +158,44 @@
     </div>
     <div id="editResults"></div>
   </div>
+
+  <div id="managePage" class="page">
+    <h1 class="page-title">จัดการนักเรียน</h1>
+
+    <div class="card">
+      <h2 style="margin-bottom:16px;font-size:24px;font-weight:800;color:#2d3748">เพิ่มนักเรียนใหม่</h2>
+      <div class="filter-section">
+        <div class="filter-group">
+          <label class="filter-label">เลือกห้อง</label>
+          <select class="filter-select" id="addStudentRoom"><option value="">เลือกห้อง</option></select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">ชื่อ-สกุลนักเรียนใหม่</label>
+          <input class="filter-input" id="addStudentName" placeholder="พิมพ์ชื่อ-สกุล">
+        </div>
+      </div>
+      <div class="action-buttons">
+        <button class="action-btn secondary" onclick="addStudentToRoom()">เพิ่มนักเรียนต่อท้ายห้องนี้</button>
+      </div>
+      <div style="font-size:14px;color:#718096;margin-top:8px">ระบบจะกำหนดเลขที่ใหม่ต่อจากเลขที่สุดท้ายในห้องนั้นอัตโนมัติ และไม่แก้ไขข้อมูลเดิม</div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom:16px;font-size:24px;font-weight:800;color:#2d3748">ย้ายห้องนักเรียน</h2>
+      <div class="filter-section">
+        <div class="filter-group">
+          <label class="filter-label">ห้องปัจจุบัน</label>
+          <select class="filter-select" id="manageFromRoom" onchange="loadManageStudents()"><option value="">เลือกห้อง</option></select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">ย้ายไปห้อง</label>
+          <select class="filter-select" id="manageToRoom"><option value="">เลือกห้องปลายทาง</option></select>
+        </div>
+      </div>
+      <div id="manageStudentsList"></div>
+      <div style="font-size:14px;color:#718096;margin-top:12px">หมายเหตุ: การย้ายห้องจะย้ายข้อมูลในทะเบียนนักเรียนสำหรับการเช็คชื่อครั้งต่อไป ส่วนประวัติการเช็คชื่อเก่าจะคงอยู่ตามห้องเดิมเพื่อไม่ให้รายงานย้อนหลังเพี้ยน</div>
+    </div>
+  </div>
 </div>
 
 <div class="credit">พัฒนาระบบโดยครูดิว</div>
@@ -165,8 +204,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ===== ใส่ค่าของ Supabase ตรงนี้ ===== */
-const SUPABASE_URL = 'https://yzkbmnjvwpqowypdxxnd.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_hbCRKLrc5oHkTjCijEjw7g_M50HluqG';
+const SUPABASE_URL = 'ใส่ Project URL ของ Supabase ตรงนี้';
+const SUPABASE_ANON_KEY = 'ใส่ anon public key ของ Supabase ตรงนี้';
 
 /* ===== ตั้งค่าห้องเรียน ===== */
 const rooms = ['ม.4/1','ม.4/2','ม.4/3','ม.4/4','ม.4/5','ม.4/6','ม.4/7','ม.4/8','ม.4/9','ม.4/10','ม.4/11'];
@@ -216,7 +255,7 @@ function normalizeStatus(s){
 function showPage(page){
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const tabs = ['home','backdate','report','status','edit'];
+  const tabs = ['home','backdate','report','status','edit','manage'];
   const idx = tabs.indexOf(page);
   document.getElementById(page + 'Page').classList.add('active');
   if (idx >= 0) document.querySelector('.nav-btn:nth-child(' + (idx + 1) + ')').classList.add('active');
@@ -224,6 +263,7 @@ function showPage(page){
   if (page === 'status') initStatusFilters();
   if (page === 'edit') initEditFilters();
   if (page === 'backdate') initBackdateFilters();
+  if (page === 'manage') initManageFilters();
 }
 
 function initRoomGrid(){
@@ -822,6 +862,121 @@ async function openBackdateAttendance(room, dateISO){
     console.error(err);
     showToast('❌ โหลดรายชื่อนักเรียนไม่สำเร็จ: ' + err.message,'#e53e3e');
   }
+}
+
+
+function initManageFilters(){
+  fillRoomSelect('addStudentRoom','เลือกห้อง');
+  fillRoomSelect('manageFromRoom','เลือกห้อง');
+  fillRoomSelect('manageToRoom','เลือกห้องปลายทาง');
+  document.getElementById('manageStudentsList').innerHTML = '';
+}
+
+async function getNextStudentNo(room){
+  ensureDb();
+  const { data, error } = await db
+    .from('students')
+    .select('no')
+    .eq('room', room)
+    .order('no', { ascending:false })
+    .limit(1);
+
+  if (error) throw error;
+  const lastNo = data && data.length ? Number(data[0].no || 0) : 0;
+  return lastNo + 1;
+}
+
+async function addStudentToRoom(){
+  const room = document.getElementById('addStudentRoom').value;
+  const name = document.getElementById('addStudentName').value.trim();
+
+  if (!room) return showToast('⚠️ กรุณาเลือกห้อง','#dd6b20');
+  if (!name) return showToast('⚠️ กรุณากรอกชื่อ-สกุลนักเรียน','#dd6b20');
+
+  try {
+    ensureDb();
+    const nextNo = await getNextStudentNo(room);
+    const { error } = await db.from('students').insert([{ room, no:nextNo, name }]);
+    if (error) throw error;
+
+    document.getElementById('addStudentName').value = '';
+    showToast(`✅ เพิ่มนักเรียนเลขที่ ${nextNo} ห้อง ${room} สำเร็จ`);
+
+    if (document.getElementById('manageFromRoom').value === room) {
+      loadManageStudents();
+    }
+  } catch(err) {
+    console.error(err);
+    showToast('❌ เพิ่มนักเรียนไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+async function loadManageStudents(){
+  const room = document.getElementById('manageFromRoom').value;
+  const wrap = document.getElementById('manageStudentsList');
+
+  if (!room) {
+    wrap.innerHTML = '';
+    return;
+  }
+
+  try {
+    const students = await getStudents(room);
+    if (!students.length) {
+      wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">ไม่พบนักเรียนในห้องนี้</div></div>`;
+      return;
+    }
+
+    wrap.innerHTML = `<div class="student-list">${students.map(st => `
+      <div class="student-item">
+        <div class="student-info">
+          <div class="student-no">${st.no}</div>
+          <div class="student-name">${escapeHTML(st.name)}</div>
+        </div>
+        <button class="action-btn" style="background:#805ad5" onclick="moveStudent('${escapeAttr(room)}',${Number(st.no)},'${escapeAttr(st.name)}')">ย้ายห้อง</button>
+      </div>
+    `).join('')}</div>`;
+  } catch(err) {
+    console.error(err);
+    showToast('❌ โหลดรายชื่อนักเรียนไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+async function moveStudent(fromRoom, no, name){
+  const toRoom = document.getElementById('manageToRoom').value;
+
+  if (!toRoom) return showToast('⚠️ กรุณาเลือกห้องปลายทาง','#dd6b20');
+  if (toRoom === fromRoom) return showToast('⚠️ ห้องปลายทางต้องไม่ใช่ห้องเดิม','#dd6b20');
+
+  const ok = confirm(`ย้าย ${name} จาก ${fromRoom} ไป ${toRoom} ใช่ไหม?\nระบบจะให้เลขที่ใหม่ต่อท้ายห้องปลายทาง และไม่แก้ประวัติการเช็คชื่อเก่า`);
+  if (!ok) return;
+
+  try {
+    ensureDb();
+    const newNo = await getNextStudentNo(toRoom);
+    const { error } = await db
+      .from('students')
+      .update({ room:toRoom, no:newNo })
+      .eq('room', fromRoom)
+      .eq('no', no)
+      .eq('name', name);
+
+    if (error) throw error;
+
+    showToast(`✅ ย้ายห้องสำเร็จ: ${toRoom} เลขที่ ${newNo}`);
+    loadManageStudents();
+  } catch(err) {
+    console.error(err);
+    showToast('❌ ย้ายห้องไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+function escapeHTML(s){
+  return String(s ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+}
+
+function escapeAttr(s){
+  return String(s ?? '').replace(/[\'"&<>]/g, ch => ({"\\":"\\\\","'":"\\'",'"':'&quot;','&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
 }
 
 function formatShortDate(s){
