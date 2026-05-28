@@ -715,6 +715,7 @@ function exportReport(){
 
 function exportReportPDF(){
   if (!lastReportData.length) return showToast('⚠️ กรุณากดแสดงข้อมูลรายงานก่อนส่งออก PDF','#dd6b20');
+
   const room = document.getElementById('reportRoom').value || 'ทุกห้อง';
   const start = document.getElementById('reportStartDate').value;
   const end = document.getElementById('reportEndDate').value;
@@ -729,28 +730,141 @@ function exportReportPDF(){
   });
 
   const allStats = Object.values(stats).sort((a,b)=>a.room.localeCompare(b.room)||a.no-b.no);
+
   const rowsHtml = arr => arr.map(s => {
+    const totalActivityDays = s.M + s.K + s.L;
     const pct = ((s.M / totalDays) * 100).toFixed(1);
-    return `<tr><td class="center">${s.room}</td><td class="center">${s.no}</td><td>${s.name}</td><td class="center">${s.M}</td><td class="center">${s.K}</td><td class="center">${s.L}</td><td class="center" style="${pct < 80 ? 'background:#fee2e2;color:#b91c1c;font-weight:800;' : ''}">${pct}%</td></tr>`;
+    return `
+      <tr>
+        <td class="center">${s.room}</td>
+        <td class="center">${s.no}</td>
+        <td>${s.name}</td>
+        <td class="center">${totalActivityDays}</td>
+        <td class="center">${s.M}</td>
+        <td class="center">${s.K}</td>
+        <td class="center">${s.L}</td>
+        <td class="center" style="${pct < 80 ? 'background:#fee2e2;color:#b91c1c;font-weight:800;' : ''}">${pct}%</td>
+      </tr>`;
   }).join('');
 
+  const signatureHTML = `
+    <div class="signature-section">
+      <div class="signature-box">
+        <div class="sign-line">ลงชื่อ....................................................</div>
+        <div>(....................................................)</div>
+        <div>ครูที่ปรึกษา</div>
+      </div>
+      <div class="signature-box">
+        <div class="sign-line">ลงชื่อ....................................................</div>
+        <div>(....................................................)</div>
+        <div>ครูที่ปรึกษา</div>
+      </div>
+    </div>
+
+    <div class="signature-section lower-signature">
+      <div class="signature-box">
+        <div class="sign-line">ลงชื่อ....................................................</div>
+        <div>(....................................................)</div>
+        <div>หัวหน้าระดับชั้น ม.4</div>
+      </div>
+      <div class="signature-box">
+        <div class="sign-line">ลงชื่อ....................................................</div>
+        <div>(นายกนกพล เมืองแก้ว)</div>
+        <div>หัวหน้าระดับชั้น</div>
+      </div>
+    </div>`;
+
   const low = allStats.filter(s => ((s.M / totalDays) * 100) < 80);
-  const html = `<!doctype html><html lang="th"><head><meta charset="UTF-8"><title>รายงาน</title><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"><style>
-    @page{size:A4 portrait;margin:14mm 12mm 16mm}*{box-sizing:border-box}body{font-family:'Sarabun',sans-serif;color:#111827;font-size:13px;line-height:1.35}.header{text-align:center;margin-bottom:14px}.header h1{font-size:22px;margin:0 0 4px}table{width:100%;border-collapse:collapse}tr{page-break-inside:avoid}th,td{border:1px solid #333;padding:6px 7px;vertical-align:middle}th{background:#e5e7eb;font-weight:700;text-align:center}.center{text-align:center}.summary-title{font-size:16px;font-weight:800;margin:14px 0 8px}.signature-section{margin-top:45px;display:grid;grid-template-columns:1fr 1fr;gap:30px;page-break-inside:avoid}.signature-box{text-align:center;min-height:110px}.sign-line{margin-top:45px}
-  </style></head><body>
-    <div class="header"><h1>รายงานสรุปการเข้าร่วมกิจกรรมหน้าเสาธง</h1><div>โรงเรียนหนองหานวิทยา</div><div>ระดับชั้นมัธยมศึกษาปีที่ 4 | ห้อง: ${room}</div><div>ช่วงวันที่ ${formatDateTH(start)} ถึง ${formatDateTH(end)}</div></div>
+
+  const html = `<!doctype html>
+  <html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <title>รายงาน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      @page{size:A4 portrait;margin:14mm 12mm 16mm}
+      *{box-sizing:border-box}
+      body{font-family:'Sarabun',sans-serif;color:#111827;font-size:13px;line-height:1.35}
+      .header{text-align:center;margin-bottom:14px}
+      .header h1{font-size:22px;margin:0 0 4px}
+      table{width:100%;border-collapse:collapse}
+      tr{page-break-inside:avoid}
+      th,td{border:1px solid #333;padding:6px 7px;vertical-align:middle}
+      th{background:#e5e7eb;font-weight:700;text-align:center}
+      .center{text-align:center}
+      .summary-title{font-size:16px;font-weight:800;margin:14px 0 8px}
+      .signature-section{margin-top:38px;display:grid;grid-template-columns:1fr 1fr;gap:30px;page-break-inside:avoid}
+      .lower-signature{margin-top:20px}
+      .signature-box{text-align:center;min-height:95px}
+      .sign-line{margin-top:35px}
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>รายงานสรุปการเข้าร่วมกิจกรรมหน้าเสาธง</h1>
+      <div>โรงเรียนหนองหานวิทยา</div>
+      <div>ระดับชั้นมัธยมศึกษาปีที่ 4 | ห้อง: ${room}</div>
+      <div>ช่วงวันที่ ${formatDateTH(start)} ถึง ${formatDateTH(end)}</div>
+    </div>
+
     <div class="summary-title">ตารางสรุปรายบุคคล</div>
-    <table><thead><tr><th>ห้อง</th><th>เลขที่</th><th>ชื่อ-สกุล</th><th>มา</th><th>ขาด</th><th>ลา</th><th>ร้อยละการมาเรียน</th></tr></thead><tbody>${rowsHtml(allStats)}</tbody></table>
-    <div class="signature-section"><div class="signature-box"><div class="sign-line">ลงชื่อ....................................................</div><div>(....................................................)</div><div>ครูที่ปรึกษา</div></div><div class="signature-box"><div class="sign-line">ลงชื่อ....................................................</div><div>(....................................................)</div><div>ครูที่ปรึกษา</div></div></div>
+    <table>
+      <thead>
+        <tr>
+          <th>ห้อง</th>
+          <th>เลขที่</th>
+          <th>ชื่อ-สกุล</th>
+          <th>รวมเวลาทำกิจกรรมฯ ทั้งหมด (วัน)</th>
+          <th>มา</th>
+          <th>ขาด</th>
+          <th>ลา</th>
+          <th>ร้อยละการมาเรียน</th>
+        </tr>
+      </thead>
+      <tbody>${rowsHtml(allStats)}</tbody>
+    </table>
+
+    ${signatureHTML}
+
     <div style="page-break-before:always"></div>
-    <div class="header"><h1>รายงานนักเรียนเข้าร่วมกิจกรรมหน้าเสาธง ไม่ถึงร้อยละ 80</h1><div>โรงเรียนหนองหานวิทยา</div><div>ระดับชั้นมัธยมศึกษาปีที่ 4 | ห้อง: ${room}</div><div>ช่วงวันที่ ${formatDateTH(start)} ถึง ${formatDateTH(end)}</div></div>
-    <table><thead><tr><th>ห้อง</th><th>เลขที่</th><th>ชื่อ-สกุล</th><th>มา</th><th>ขาด</th><th>ลา</th><th>ร้อยละ</th></tr></thead><tbody>${low.length ? rowsHtml(low) : '<tr><td colspan="7" class="center" style="padding:20px">ไม่พบนักเรียนที่เข้าร่วมกิจกรรมต่ำกว่าร้อยละ 80</td></tr>'}</tbody></table>
-    <div class="signature-section"><div class="signature-box"><div class="sign-line">ลงชื่อ....................................................</div><div>(....................................................)</div><div>ครูที่ปรึกษา</div></div><div class="signature-box"><div class="sign-line">ลงชื่อ....................................................</div><div>(....................................................)</div><div>ครูที่ปรึกษา</div></div></div>
-    <script>window.onload=function(){window.print()};<\/script></body></html>`;
+
+    <div class="header">
+      <h1>รายงานนักเรียนเข้าร่วมกิจกรรมหน้าเสาธง ไม่ถึงร้อยละ 80</h1>
+      <div>โรงเรียนหนองหานวิทยา</div>
+      <div>ระดับชั้นมัธยมศึกษาปีที่ 4 | ห้อง: ${room}</div>
+      <div>ช่วงวันที่ ${formatDateTH(start)} ถึง ${formatDateTH(end)}</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ห้อง</th>
+          <th>เลขที่</th>
+          <th>ชื่อ-สกุล</th>
+          <th>รวมเวลาทำกิจกรรมฯ ทั้งหมด (วัน)</th>
+          <th>มา</th>
+          <th>ขาด</th>
+          <th>ลา</th>
+          <th>ร้อยละ</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${low.length ? rowsHtml(low) : '<tr><td colspan="8" class="center" style="padding:20px">ไม่พบนักเรียนที่เข้าร่วมกิจกรรมต่ำกว่าร้อยละ 80</td></tr>'}
+      </tbody>
+    </table>
+
+    ${signatureHTML}
+
+    <script>window.onload=function(){window.print()};<\/script>
+  </body>
+  </html>`;
 
   const win = window.open('', '_blank');
   if (!win) return showToast('⚠️ กรุณาอนุญาต Pop-up เพื่อเปิดหน้าพิมพ์ PDF','#dd6b20');
-  win.document.open(); win.document.write(html); win.document.close();
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
 }
 
 function initStatusFilters(){
