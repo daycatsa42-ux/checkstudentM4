@@ -88,6 +88,78 @@
       .manage-quick-btn{right:12px;bottom:12px;font-size:13px;padding:11px 14px}
     }
     @media(max-width:430px){.room-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nav-btn{font-size:12px;padding:7px 8px}.student-name{font-size:18px}.status-btn{font-size:15px;padding:9px 6px}.card{padding:12px}.manage-quick-btn{max-width:46vw;white-space:normal;line-height:1.2}}
+
+    /* ===== Compact attendance layout: applies ONLY to the attendance page ===== */
+    #attendancePage > .card {
+      padding: 18px 22px;
+      border-radius: 14px;
+    }
+    #attendancePage .card-header {
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    #attendancePage .room-title { font-size: 22px; }
+    #attendancePage .filter-group { gap: 5px; }
+    #attendancePage .filter-label { font-size: 13px; }
+    #attendancePage .filter-input { padding: 7px 10px; font-size: 14px; }
+    #attendancePage .action-buttons { gap: 7px; margin: 8px 0 12px; }
+    #attendancePage .action-btn { padding: 7px 12px; font-size: 13px; border-radius: 8px; }
+
+    #attendancePage .student-list { gap: 5px; }
+    #attendancePage .student-item {
+      min-height: 44px;
+      padding: 7px 12px;
+      gap: 8px;
+      border-radius: 8px;
+      flex-wrap: nowrap;
+    }
+    #attendancePage .student-item:hover { transform: none; }
+    #attendancePage .student-info { flex: 1; min-width: 0; gap: 10px; }
+    #attendancePage .student-no { min-width: 27px; font-size: 16px; text-align: center; }
+    #attendancePage .student-name {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+    #attendancePage .status-buttons { display: flex; flex-wrap: nowrap; width: auto; gap: 5px; }
+    #attendancePage .status-btn {
+      min-width: 58px;
+      width: auto;
+      padding: 6px 12px;
+      border-width: 1.5px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    #attendancePage .save-btn {
+      margin-top: 12px;
+      padding: 11px;
+      border-radius: 9px;
+      font-size: 17px;
+    }
+
+    /* On phones, keep status buttons easy to tap while taking less vertical space. */
+    @media (max-width: 640px) {
+      #attendancePage > .card { padding: 10px; }
+      #attendancePage .card-header { align-items: stretch; }
+      #attendancePage .room-title { font-size: 19px; }
+      #attendancePage .card-header .filter-group { min-width: 0 !important; width: 100%; }
+      #attendancePage .action-buttons { gap: 5px; margin: 9px 0; }
+      #attendancePage .action-btn { padding: 6px 9px; font-size: 12px; }
+      #attendancePage .student-item { padding: 7px 9px; gap: 5px; flex-wrap: wrap; }
+      #attendancePage .student-info { width: 100%; flex: 0 0 100%; gap: 7px; }
+      #attendancePage .student-no { min-width: 22px; font-size: 15px; }
+      #attendancePage .student-name { font-size: 16px; }
+      #attendancePage .status-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px;
+        width: 100%;
+      }
+      #attendancePage .status-btn { min-width: 0; width: 100%; padding: 5px 7px; font-size: 13px; }
+      #attendancePage .save-btn { padding: 10px; font-size: 16px; }
+    }
   </style>
 </head>
 <body>
