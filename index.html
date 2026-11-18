@@ -89,6 +89,15 @@
     }
     @media(max-width:430px){.room-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nav-btn{font-size:12px;padding:7px 8px}.student-name{font-size:18px}.status-btn{font-size:15px;padding:9px 6px}.card{padding:12px}.manage-quick-btn{max-width:46vw;white-space:normal;line-height:1.2}}
 
+    /* ระบบนักเรียนย้าย: ปุ่มเล็ก ไม่รบกวนการเช็คชื่อ */
+    .transfer-mini{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;border-radius:8px;padding:7px 10px;font:700 12px 'Sarabun',sans-serif;cursor:pointer;white-space:nowrap}
+    .transfer-mini:hover{background:#ffedd5}
+    .transferred-tag{display:inline-block;border-radius:999px;background:#fff7ed;color:#9a3412;padding:3px 10px;font-size:13px;font-weight:800}
+    .archive-history{margin-top:14px;border:1px solid #e2e8f0;border-radius:12px;padding:16px;background:#fff}
+    .archive-history table{width:100%;border-collapse:collapse}
+    .archive-history th,.archive-history td{border-bottom:1px solid #e2e8f0;padding:8px;text-align:left}
+    @media(max-width:640px){#attendancePage .transfer-mini{font-size:11px;padding:5px 8px;margin-left:auto}}
+
     /* ===== Compact attendance layout: applies ONLY to the attendance page ===== */
     #attendancePage > .card {
       padding: 18px 22px;
@@ -174,6 +183,7 @@
       <button class="nav-btn" onclick="showPage('dailyImage')">ภาพรายวัน</button>
       <button class="nav-btn" onclick="showPage('edit')">แก้ไข</button>
       <button class="nav-btn" onclick="openManagePage()">จัดการนักเรียน</button>
+      <button class="nav-btn" onclick="showPage('transferred')">นักเรียนย้าย</button>
     </div>
   </nav>
 
@@ -339,7 +349,7 @@
     </div>
 
     <div class="card">
-      <h2 style="margin-bottom:16px;font-size:24px;font-weight:800;color:#2d3748">ย้ายห้องนักเรียน</h2>
+      <h2 style="margin-bottom:16px;font-size:24px;font-weight:800;color:#2d3748">จัดการรายชื่อและย้ายห้องนักเรียน</h2>
       <div class="filter-section">
         <div class="filter-group">
           <label class="filter-label">ห้องปัจจุบัน</label>
@@ -351,7 +361,27 @@
         </div>
       </div>
       <div id="manageStudentsList"></div>
-      <div style="font-size:14px;color:#718096;margin-top:12px">หมายเหตุ: การย้ายห้องจะย้ายข้อมูลในทะเบียนนักเรียนสำหรับการเช็คชื่อครั้งต่อไป ส่วนประวัติการเช็คชื่อเก่าจะคงอยู่ตามห้องเดิมเพื่อไม่ให้รายงานย้อนหลังเพี้ยน</div>
+      <div style="font-size:14px;color:#718096;margin-top:12px">ปุ่ม “ย้ายห้อง” ใช้เมื่อนักเรียนเปลี่ยนห้องเรียน ส่วนปุ่ม “ย้ายออก” ใช้เมื่อนักเรียนย้ายออกจากทะเบียนเช็คชื่อ โดยระบบเก็บประวัติเดิมแยกไว้และไม่รวมในรายงานปัจจุบัน</div>
+      <div class="action-buttons"><button class="action-btn" style="background:#c05621" onclick="showPage('transferred')">ดูเมนูนักเรียนย้าย</button></div>
+    </div>
+  </div>
+
+  <div id="transferredPage" class="page">
+    <h1 class="page-title">นักเรียนย้าย</h1>
+    <div class="card">
+      <div class="card-header">
+        <div><h2 style="font-size:22px;color:#9a3412">ทะเบียนนักเรียนที่ย้ายออก</h2><p style="color:#718096;margin-top:6px">ข้อมูลเช็คชื่อเก่ายังคงอยู่ใน Supabase แต่ไม่ถูกนำไปรวมในรายงานนักเรียนปัจจุบัน</p></div>
+        <span class="transferred-tag" id="transferredCount">กำลังโหลด...</span>
+      </div>
+      <div class="filter-section" style="margin-top:18px">
+        <div class="filter-group"><label class="filter-label">เลือกห้องเดิม</label><select class="filter-select" id="transferredRoom" onchange="loadTransferredStudents()"><option value="">ทุกห้อง</option></select></div>
+      </div>
+      <div class="action-buttons">
+        <button class="action-btn" onclick="loadTransferredStudents()">โหลดรายชื่อนักเรียนย้าย</button>
+        <button class="action-btn secondary" onclick="showPage('manage')">กลับไปจัดการนักเรียน</button>
+      </div>
+      <div id="transferredStudentsList" style="margin-top:16px"></div>
+      <div id="transferredHistory"></div>
     </div>
   </div>
 </div>
@@ -458,13 +488,13 @@ function openManagePage(){
 }
 
 function showPage(page){
-  if (page === 'manage' && !manageUnlocked) {
+  if ((page === 'manage' || page === 'transferred') && !manageUnlocked) {
     if (!checkManagePassword()) return;
   }
 
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const tabs = ['home','backdate','report','status','dailyImage','edit','manage'];
+  const tabs = ['home','backdate','report','status','dailyImage','edit','manage','transferred'];
   const idx = tabs.indexOf(page);
   document.getElementById(page + 'Page').classList.add('active');
   if (idx >= 0) document.querySelector('.nav-btn:nth-child(' + (idx + 1) + ')').classList.add('active');
@@ -474,6 +504,7 @@ function showPage(page){
   if (page === 'edit') initEditFilters();
   if (page === 'backdate') initBackdateFilters();
   if (page === 'manage') initManageFilters();
+  if (page === 'transferred') initTransferredFilters();
 }
 
 function initRoomGrid(){
@@ -490,7 +521,7 @@ function initRoomGrid(){
 
 async function getStudents(room){
   ensureDb();
-  const { data, error } = await db.from('students').select('room,no,name').eq('room', room).order('no', {ascending:true});
+  const { data, error } = await db.from('students').select('id,room,no,name').eq('room', room).eq('is_transferred', false).order('no', {ascending:true});
   if (error) throw error;
   return data || [];
 }
@@ -591,7 +622,8 @@ function renderStudentList(students){
         <button class="status-btn present" onclick="setStatus(${st.no},'M')" data-student="${st.no}" data-status="present">${defaultConfig.present_text}</button>
         <button class="status-btn absent" onclick="setStatus(${st.no},'K')" data-student="${st.no}" data-status="absent">${defaultConfig.absent_text}</button>
         <button class="status-btn leave" onclick="setStatus(${st.no},'L')" data-student="${st.no}" data-status="leave">${defaultConfig.leave_text}</button>
-      </div>`;
+      </div>
+      <button type="button" class="transfer-mini" title="ย้ายออกจากทะเบียนเช็คชื่อ (ต้องใส่รหัสจัดการ)" data-id="${escapeHTML(st.id)}" onclick="transferStudentOut(this.dataset.id)">ย้ายออก</button>`;
     wrap.appendChild(div);
   });
 }
@@ -618,6 +650,21 @@ function clearAll(){
 
 async function saveAttendance(){
   const btn = document.getElementById('saveBtn');
+  // ตรวจสอบรายชื่อจากฐานข้อมูลก่อนนับจำนวน เพื่อรองรับครูหลายคนเปิดหน้าเว็บพร้อมกัน
+  try {
+    const freshStudents = await getStudents(currentRoom);
+    if (freshStudents.map(s => String(s.id)).join('|') !== currentStudents.map(s => String(s.id)).join('|')) {
+      const oldAttendance = {...currentAttendance};
+      currentStudents = freshStudents;
+      currentAttendance = {};
+      renderStudentList(currentStudents);
+      currentStudents.forEach(st => { if (oldAttendance[st.no]) setStatus(st.no, oldAttendance[st.no]); });
+      return showToast('⚠️ รายชื่อมีการเปลี่ยนแปลง กรุณาตรวจสอบและกดบันทึกอีกครั้ง','#dd6b20');
+    }
+  } catch(err) {
+    console.error(err);
+    return showToast('❌ ตรวจสอบทะเบียนนักเรียนไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
   const total = currentStudents.length;
   const checked = Object.keys(currentAttendance).length;
   if (checked < total) {
@@ -650,6 +697,7 @@ async function saveAttendance(){
       room: currentRoom,
       student_no: Number(s.no),
       student_name: s.name,
+      student_ref: String(s.id),
       status: normalizeStatus(currentAttendance[s.no] || 'M')
     }));
 
@@ -693,17 +741,25 @@ function initReportFilters(){
 
 async function getReport(roomOrEmpty, startISO, endISO){
   ensureDb();
-  let q = db.from('attendance')
-    .select('date,room,student_no,student_name,status,timestamp')
-    .gte('date', startISO)
-    .lte('date', endISO)
-    .order('date', {ascending:true})
-    .order('room', {ascending:true})
-    .order('student_no', {ascending:true});
-  if (roomOrEmpty) q = q.eq('room', roomOrEmpty);
-  const { data, error } = await q;
-  if (error) throw error;
-  return (data || []).map(r => ({...r, status:normalizeStatus(r.status)}));
+  // อ่านข้อมูลครบทุกหน้า (Supabase ตั้งค่าเริ่มต้นสูงสุด 1,000 แถวต่อคำขอ)
+  const all = [];
+  const pageSize = 800;
+  for (let offset = 0; ; offset += pageSize) {
+    let q = db.from('attendance')
+      .select('date,room,student_no,student_name,student_ref,status,timestamp')
+      .eq('is_transferred', false)
+      .gte('date', startISO)
+      .lte('date', endISO)
+      .order('date', {ascending:true})
+      .order('room', {ascending:true})
+      .order('student_no', {ascending:true});
+    if (roomOrEmpty) q = q.eq('room', roomOrEmpty);
+    const { data, error } = await q.range(offset, offset + pageSize - 1);
+    if (error) throw error;
+    all.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+  }
+  return all.map(r => ({...r, status:normalizeStatus(r.status)}));
 }
 
 async function generateReport(){
@@ -999,22 +1055,16 @@ async function loadDailyImageData(){
     showToast('⚠️ กรุณาเลือกวันที่','#dd6b20');
     return [];
   }
-
-  ensureDb();
-  let q = db.from('attendance')
-    .select('date,room,student_no,student_name,status')
-    .eq('date', dateISO)
-    .order('room', {ascending:true})
-    .order('student_no', {ascending:true})
-    .range(0, 9999);
-  if (room) q = q.eq('room', room);
-
-  const { data, error } = await q;
-  if (error) throw error;
-  return (data || []).map(r => ({...r, status:normalizeStatus(r.status)}));
+  // ใช้เงื่อนไขเดียวกับรายงาน ไม่รวมข้อมูลของนักเรียนย้าย
+  return getReport(room, dateISO, dateISO);
 }
 
 async function loadDailyImagePreview(){
+  // ล้างพรีวิวเดิมก่อนโหลดทุกครั้ง เพื่อไม่ให้ส่งออกข้อมูลเก่าหลังมีนักเรียนย้าย
+  const previewBox = document.getElementById('dailyImagePreviewBox');
+  const previewArea = document.getElementById('dailyImageCaptureArea');
+  previewBox.style.display = 'none';
+  previewArea.innerHTML = '';
   try {
     const rows = await loadDailyImageData();
     if (!rows.length) {
@@ -1173,10 +1223,8 @@ async function saveCanvasAsPng(canvas, fileName){
 
 async function downloadDailyAttendanceImage(){
   try {
-    const area = document.getElementById('dailyImageCaptureArea');
-    if (!area || !area.innerHTML.trim()) {
-      await loadDailyImagePreview();
-    }
+    // รีเฟรชจากฐานข้อมูลทุกครั้ง ก่อนดาวน์โหลดรูป ไม่ใช้พรีวิวค้างจากวัน/ห้องเดิม
+    await loadDailyImagePreview();
     const captureArea = document.getElementById('dailyImageCaptureArea');
     if (!captureArea || !captureArea.innerHTML.trim()) return;
 
@@ -1219,7 +1267,7 @@ function loadStatusCustom(){
 async function loadStatus(dateISO){
   try {
     ensureDb();
-    const { data, error } = await db.from('attendance').select('room').eq('date', dateISO);
+    const { data, error } = await db.from('attendance').select('room').eq('is_transferred', false).eq('date', dateISO);
     if (error) throw error;
     const seen = {};
     (data || []).forEach(r => seen[r.room] = (seen[r.room] || 0) + 1);
@@ -1272,16 +1320,7 @@ async function loadWeeklyStatus(){
   try {
     ensureDb();
 
-    // สำคัญ: Supabase คืนค่าครั้งละ 1,000 แถวโดยค่าเริ่มต้น
-    // สัปดาห์หนึ่งอาจมี 11 ห้อง x นักเรียนหลายคน x 5 วัน จึงต้องกำหนด range ให้กว้างขึ้น
-    const { data, error } = await db
-      .from('attendance')
-      .select('date,room,status,student_no')
-      .gte('date', weekDates[0])
-      .lte('date', weekDates[4])
-      .range(0, 9999);
-
-    if (error) throw error;
+    const data = await getReport('', weekDates[0], weekDates[4]);
 
     const safeRows = (data || []).map(r => ({
       date: String(r.date || '').slice(0,10).trim(),
@@ -1385,7 +1424,7 @@ async function loadEditDay(){
       return;
     }
 
-    editState = {room, dateISO, rows:rows.sort((a,b)=>a.student_no-b.student_no).map(r => ({no:r.student_no,name:r.student_name,status:r.status}))};
+    editState = {room, dateISO, rows:rows.sort((a,b)=>a.student_no-b.student_no).map(r => ({no:r.student_no,name:r.student_name,status:r.status,student_ref:r.student_ref || null}))};
     renderEditList();
     document.getElementById('editSaveBtn').style.display = 'inline-block';
     showToast('✅ โหลดรายการสำเร็จ');
@@ -1422,11 +1461,17 @@ async function saveEditedDay(){
 
   try {
     ensureDb();
+    const latestRows = await getReport(editState.room, editState.dateISO, editState.dateISO);
+    const latestKeys = new Set(latestRows.map(r => `${r.student_no}|${r.student_name}`));
+    if (editState.rows.some(r => !latestKeys.has(`${r.no}|${r.name}`))) {
+      throw new Error('ทะเบียนมีการเปลี่ยนแปลง กรุณาโหลดรายการแก้ไขใหม่');
+    }
     const rows = editState.rows.map(r => ({
       date: editState.dateISO,
       room: editState.room,
       student_no: Number(r.no),
       student_name: r.name,
+      student_ref: r.student_ref,
       status: normalizeStatus(r.status)
     }));
     const { error } = await db.from('attendance').upsert(rows, {onConflict:'date,room,student_no'});
@@ -1683,7 +1728,10 @@ async function loadManageStudents(){
           <div class="student-no">${st.no}</div>
           <div class="student-name">${escapeHTML(st.name)}</div>
         </div>
-        <button class="action-btn" style="background:#805ad5" onclick="moveStudent('${escapeAttr(room)}',${Number(st.no)},'${escapeAttr(st.name)}')">ย้ายห้อง</button>
+        <div class="action-buttons" style="margin:0">
+          <button class="action-btn" style="background:#805ad5" data-id="${escapeHTML(st.id)}" onclick="moveStudent(this.dataset.id)">ย้ายห้อง</button>
+          <button class="action-btn" style="background:#c05621" data-id="${escapeHTML(st.id)}" onclick="transferStudentOut(this.dataset.id)">ย้ายออก</button>
+        </div>
       </div>
     `).join('')}</div>`;
   } catch(err) {
@@ -1692,32 +1740,184 @@ async function loadManageStudents(){
   }
 }
 
-async function moveStudent(fromRoom, no, name){
+async function moveStudent(studentId){
+  if (!manageUnlocked && !checkManagePassword()) return;
   const toRoom = document.getElementById('manageToRoom').value;
-
   if (!toRoom) return showToast('⚠️ กรุณาเลือกห้องปลายทาง','#dd6b20');
-  if (toRoom === fromRoom) return showToast('⚠️ ห้องปลายทางต้องไม่ใช่ห้องเดิม','#dd6b20');
-
-  const ok = confirm(`ย้าย ${name} จาก ${fromRoom} ไป ${toRoom} ใช่ไหม?\nระบบจะให้เลขที่ใหม่ต่อท้ายห้องปลายทาง และไม่แก้ประวัติการเช็คชื่อเก่า`);
-  if (!ok) return;
 
   try {
     ensureDb();
+    const {data:st, error:studentError} = await db.from('students')
+      .select('id,room,no,name,is_transferred').eq('id',studentId).single();
+    if (studentError) throw studentError;
+    if (st.is_transferred) return showToast('⚠️ นักเรียนอยู่ในเมนูนักเรียนย้ายแล้ว','#dd6b20');
+    if (toRoom === st.room) return showToast('⚠️ ห้องปลายทางต้องไม่ใช่ห้องเดิม','#dd6b20');
+    if (!confirm(`ย้ายห้อง ${st.name} จาก ${st.room} ไป ${toRoom} ใช่ไหม?\nระบบจะให้เลขที่ใหม่ต่อท้ายห้องปลายทาง และยังเก็บประวัติเดิมไว้`)) return;
     const newNo = await getNextStudentNo(toRoom);
-    const { error } = await db
-      .from('students')
-      .update({ room:toRoom, no:newNo })
-      .eq('room', fromRoom)
-      .eq('no', no)
-      .eq('name', name);
-
+    // ฟังก์ชัน SQL จะผูกประวัติกับรหัสนักเรียนก่อนเปลี่ยนห้อง ทำให้ย้ายออกภายหลังได้ถูกคน
+    const {error} = await db.rpc('move_student_room', {
+      p_student_id:String(studentId), p_target_room:toRoom, p_new_no:newNo
+    });
     if (error) throw error;
-
+    invalidateDerivedViews();
     showToast(`✅ ย้ายห้องสำเร็จ: ${toRoom} เลขที่ ${newNo}`);
-    loadManageStudents();
+    await loadManageStudents();
   } catch(err) {
     console.error(err);
     showToast('❌ ย้ายห้องไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+function invalidateDerivedViews(){
+  lastReportData = [];
+  const report = document.getElementById('reportResults');
+  if (report) report.style.display = 'none';
+  const imageBox = document.getElementById('dailyImagePreviewBox');
+  if (imageBox) imageBox.style.display = 'none';
+  const imageArea = document.getElementById('dailyImageCaptureArea');
+  if (imageArea) imageArea.innerHTML = '';
+  const editSave = document.getElementById('editSaveBtn');
+  if (editSave) editSave.style.display = 'none';
+  const editResults = document.getElementById('editResults');
+  if (editResults) editResults.innerHTML = '';
+  editState = {room:'',dateISO:'',rows:[]};
+  const statusGrid = document.getElementById('statusGrid');
+  if (statusGrid) statusGrid.innerHTML = '';
+  const weekly = document.getElementById('weeklyStatusBox');
+  if (weekly) weekly.style.display = 'none';
+}
+
+async function transferStudentOut(studentId){
+  // หน้าเช็คชื่อเปิดให้ครูดูได้ แต่การเปลี่ยนทะเบียนต้องผ่านรหัสจัดการ
+  if (!manageUnlocked && !checkManagePassword()) return;
+  try {
+    ensureDb();
+    const {data:st,error} = await db.from('students')
+      .select('id,room,no,name,is_transferred').eq('id',studentId).single();
+    if (error) throw error;
+    if (st.is_transferred) return showToast('ℹ️ รายชื่อนี้ย้ายออกแล้ว','#718096');
+    const message = `ย้ายนักเรียนออกจากทะเบียนเช็คชื่อ?\n\n${st.name} (${st.room} เลขที่ ${st.no})\n\n• จะไม่ปรากฏในหน้าเช็คชื่อและรายงานปัจจุบัน\n• ประวัติการเช็คชื่อเดิมยังเก็บไว้ในเมนู “นักเรียนย้าย”\n• สามารถคืนสถานะได้`;
+    if (!confirm(message)) return;
+    const {data:archivedCount,error:rpcError} = await db.rpc('archive_student', {p_student_id:String(studentId)});
+    if (rpcError) throw rpcError;
+    invalidateDerivedViews();
+    if (currentRoom === st.room) {
+      currentStudents = currentStudents.filter(s => String(s.id) !== String(studentId));
+      delete currentAttendance[st.no];
+      renderStudentList(currentStudents);
+      currentStudents.forEach(s => {if (currentAttendance[s.no]) setStatus(s.no,currentAttendance[s.no]);});
+    }
+    showToast(`✅ ย้ายออกแล้ว (เก็บประวัติ ${Number(archivedCount)||0} รายการ)`);
+    if (document.getElementById('managePage').classList.contains('active')) await loadManageStudents();
+    if (document.getElementById('transferredPage').classList.contains('active')) await loadTransferredStudents();
+  } catch(err) {
+    console.error(err);
+    showToast('❌ ย้ายออกไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+function initTransferredFilters(){
+  const select = document.getElementById('transferredRoom');
+  const previous = select.value;
+  fillRoomSelect('transferredRoom','ทุกห้อง');
+  select.value = previous;
+  loadTransferredStudents();
+}
+
+async function loadTransferredStudents(){
+  const room = document.getElementById('transferredRoom').value;
+  const wrap = document.getElementById('transferredStudentsList');
+  const history = document.getElementById('transferredHistory');
+  history.innerHTML = '';
+  wrap.textContent = 'กำลังโหลดรายชื่อ...';
+  try {
+    ensureDb();
+    let q = db.from('students').select('id,room,no,name,transferred_at')
+      .eq('is_transferred',true).order('room',{ascending:true}).order('no',{ascending:true});
+    if (room) q = q.eq('room',room);
+    const {data,error} = await q.range(0,9999);
+    if (error) throw error;
+    const list = data || [];
+    document.getElementById('transferredCount').textContent = `นักเรียนย้าย ${list.length} คน`;
+    if (!list.length){
+      wrap.innerHTML = '<div class="empty-state" style="padding:24px"><div class="empty-icon">📂</div><div class="empty-text">ยังไม่มีนักเรียนย้ายในห้องที่เลือก</div></div>';
+      return;
+    }
+    wrap.innerHTML = `<div class="student-list">${list.map(st => `
+      <div class="student-item">
+        <div class="student-info">
+          <div class="student-no">${escapeHTML(st.no)}</div>
+          <div>
+            <div class="student-name" style="font-size:21px">${escapeHTML(st.name)}</div>
+            <div style="color:#718096;font-weight:600;font-size:14px">${escapeHTML(st.room)} | ย้ายออกเมื่อ ${st.transferred_at ? new Date(st.transferred_at).toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'short',year:'numeric'}) : 'ไม่ระบุวันที่'}</div>
+          </div>
+        </div>
+        <div class="action-buttons" style="margin:0">
+          <button class="action-btn" data-id="${escapeHTML(st.id)}" onclick="showTransferredHistory(this.dataset.id)">ดูประวัติ</button>
+          <button class="action-btn secondary" data-id="${escapeHTML(st.id)}" onclick="restoreTransferredStudent(this.dataset.id)">คืนสถานะ</button>
+        </div>
+      </div>`).join('')}</div>`;
+  } catch(err){
+    console.error(err);
+    wrap.textContent = '';
+    showToast('❌ โหลดรายชื่อนักเรียนย้ายไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+async function showTransferredHistory(studentId){
+  const wrap = document.getElementById('transferredHistory');
+  wrap.innerHTML = '<div class="archive-history">กำลังโหลดประวัติการเช็คชื่อ...</div>';
+  try {
+    ensureDb();
+    const {data:student,error:studentError} = await db.from('students').select('name,room,no')
+      .eq('id',studentId).single();
+    if (studentError) throw studentError;
+    const rows = [];
+    const pageSize = 800;
+    for (let offset=0;;offset+=pageSize){
+      const {data,error} = await db.from('attendance')
+        .select('date,room,student_no,status').eq('student_ref',String(studentId))
+        .eq('is_transferred',true).order('date',{ascending:false})
+        .range(offset,offset+pageSize-1);
+      if (error) throw error;
+      rows.push(...(data||[]));
+      if (!data || data.length < pageSize) break;
+    }
+    const totals = {M:0,K:0,L:0};
+    rows.forEach(r => { const x=normalizeStatus(r.status); if (x in totals) totals[x]++; });
+    wrap.innerHTML = `<div class="archive-history">
+      <h3 style="font-size:21px;margin-bottom:8px">ประวัติการเช็คชื่อ: ${escapeHTML(student.name)}</h3>
+      <div style="font-weight:700;margin-bottom:12px">ทั้งหมด ${rows.length} ครั้ง | <span style="color:#16a34a">มา ${totals.M}</span> | <span style="color:#e53e3e">ขาด ${totals.K}</span> | <span style="color:#dd6b20">ลา ${totals.L}</span></div>
+      <div style="max-height:420px;overflow:auto"><table><thead><tr><th>วันที่</th><th>ห้องเดิม</th><th>เลขที่</th><th>สถานะ</th></tr></thead><tbody>
+      ${rows.map(r => `<tr><td>${formatDateTH(r.date)}</td><td>${escapeHTML(r.room)}</td><td>${escapeHTML(r.student_no)}</td><td>${({M:'มา',K:'ขาด',L:'ลา'})[normalizeStatus(r.status)]||'-'}</td></tr>`).join('') || '<tr><td colspan="4">ยังไม่มีประวัติการเช็คชื่อ</td></tr>'}
+      </tbody></table></div>
+      <div style="font-size:13px;color:#718096;margin-top:10px">ประวัติที่แสดงนี้ถูกแยกจากรายงานนักเรียนปัจจุบันแล้ว</div>
+    </div>`;
+    wrap.scrollIntoView({behavior:'smooth',block:'nearest'});
+  } catch(err){
+    console.error(err);
+    wrap.innerHTML = '';
+    showToast('❌ โหลดประวัติไม่สำเร็จ: ' + err.message,'#e53e3e');
+  }
+}
+
+async function restoreTransferredStudent(studentId){
+  if (!manageUnlocked && !checkManagePassword()) return;
+  try {
+    ensureDb();
+    const {data:st,error} = await db.from('students')
+      .select('id,room,no,name,is_transferred').eq('id',studentId).single();
+    if (error) throw error;
+    if (!st.is_transferred) return showToast('ℹ️ นักเรียนอยู่ในทะเบียนปัจจุบันแล้ว','#718096');
+    if (!confirm(`คืน ${st.name} (${st.room} เลขที่ ${st.no}) กลับเข้าทะเบียนเช็คชื่อหรือไม่?\nประวัติเก่าจะกลับไปรวมในรายงานนักเรียนปัจจุบันด้วย`)) return;
+    const {error:rpcError} = await db.rpc('restore_student', {p_student_id:String(studentId)});
+    if (rpcError) throw rpcError;
+    invalidateDerivedViews();
+    showToast('✅ คืนนักเรียนเข้าทะเบียนปัจจุบันแล้ว');
+    await loadTransferredStudents();
+  } catch(err){
+    console.error(err);
+    showToast('❌ คืนสถานะไม่สำเร็จ: ' + err.message,'#e53e3e');
   }
 }
 
